@@ -1,1 +1,2 @@
-# set(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+set(PTC_SOURCES ptc.cpp)
+add_library(ptc STATIC ${PTC_SOURCES})

@@ -1,8 +1,10 @@
-#include "iostream"
+#include <iostream>
+#include <ptc.hpp>
 
 int main() {
 
-  std::cout << "Pong sample!" << std::endl;
+  ptc::Tracker tracker;
+  tracker.test();
 
   return 0;
 
