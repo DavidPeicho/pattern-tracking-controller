@@ -1,10 +1,17 @@
-#include <iostream>
 #include <ptc.hpp>
 
 int main() {
 
-  ptc::Tracker tracker;
-  tracker.test();
+  auto tracker = ptc::Tracker::instance();
+  tracker->start();
+
+  /*while (true) {
+
+    tracker->update();
+
+  }*/
+
+  tracker->stop();
 
   return 0;
 

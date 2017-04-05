@@ -11,6 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR}/samples)
 
 include_directories(
         ${CMAKE_SOURCE_DIR}/src
+        ${OpenCV_INCLUDE_DIRS}
 )
 
 # Add source directory
