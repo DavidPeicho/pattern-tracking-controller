@@ -1,12 +1,32 @@
-#include "ptc.hpp"
+#include <ptc.hpp>
+#include <ptc-impl.hpp>
 
 namespace ptc {
 
-  void
-  Tracker::test() {
+Tracker::Tracker()
+        : pimpl_{new TrackerImpl()} { }
 
-    std::cout << "Test!" << std::endl;
-    
-  }
+Tracker::~Tracker() { }
+
+void
+Tracker::start() {
+
+  pimpl_->start();
+
+}
+
+void
+Tracker::update() {
+
+  pimpl_->update();
+
+}
+
+void
+Tracker::stop() {
+
+  pimpl_->stop();
+
+}
 
 }

@@ -1,15 +1,58 @@
 #pragma once
 
-#include <iostream>
+#include <memory>
+
+namespace ptc {
+
+  class TrackerImpl;
+
+}
 
 namespace ptc {
 
 class Tracker {
 
   public:
+    typedef std::shared_ptr<Tracker> Ptr;
+
+  public:
+    Ptr
+    static inline
+    instance() {
+
+      if (!instance_) {
+        instance_ = std::unique_ptr<Tracker>(new Tracker);
+      }
+      return instance_;
+
+    }
+
+  public:
+    ~Tracker();
+
+  public:
     void
-    test();
+    start();
+
+    void
+    update();
+
+    void
+    stop();
+
+  private:
+    Tracker();
+    Tracker(const Tracker&);
+    Tracker& operator=(const Tracker&);
+
+  private:
+    static Ptr instance_;
+
+  private:
+    std::unique_ptr<TrackerImpl> pimpl_;
 
 };
+
+Tracker::Ptr Tracker::instance_ = nullptr;
 
 }
