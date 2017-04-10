@@ -29,4 +29,11 @@ Tracker::stop() {
 
 }
 
+void
+Tracker::processFrame(cv::Mat &output, cv::Mat& input) {
+
+  pimpl_->processFrame(output, input);
+
+}
+
 }

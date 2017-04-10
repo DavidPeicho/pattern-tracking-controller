@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <opencv2/core/mat.hpp>
 
 namespace ptc {
 
@@ -39,6 +40,9 @@ class Tracker {
 
     void
     stop();
+
+    void
+    processFrame(cv::Mat& output, cv::Mat& input);
 
   private:
     Tracker();

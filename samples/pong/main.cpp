@@ -1,9 +1,12 @@
 #include <ptc.hpp>
+#include <iostream>
 
 int main() {
 
-  auto tracker = ptc::Tracker::instance();
-  tracker->start();
+  //auto tracker = ptc::Tracker::instance();
+  //tracker->start();
+
+  std::cout << "Pong" << std::endl;
 
   /*while (true) {
 
@@ -11,7 +14,7 @@ int main() {
 
   }*/
 
-  tracker->stop();
+  //tracker->stop();
 
   return 0;
 

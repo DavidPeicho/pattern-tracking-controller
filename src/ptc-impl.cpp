@@ -23,4 +23,12 @@ TrackerImpl::stop() {
 
 }
 
+void
+TrackerImpl::processFrame(cv::Mat& output, cv::Mat& input) {
+
+  processing::convert(output, input);
+
+
+}
+
 }
