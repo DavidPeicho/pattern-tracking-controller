@@ -14,7 +14,11 @@ int main() {
     return -1;
   }
 
-  cv::Mat result = cv::Mat::zeros(frame.size().height, frame.size().width,
+  /*cv::Mat result = cv::Mat::zeros(frame.size().height, frame.size().width,
+                                  CV_8UC1);*/
+
+  cv::Mat result = cv::Mat::zeros(frame.size().height / 2, frame.size().width
+                                                           / 2,
                                   CV_8UC1);
   tracker->processFrame(result, frame);
 
