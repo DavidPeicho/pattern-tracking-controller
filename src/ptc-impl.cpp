@@ -2,6 +2,8 @@
 
 namespace ptc {
 
+int TrackerImpl::MIN_SIZE = 200;
+
 void
 TrackerImpl::start() {
 
@@ -23,23 +25,36 @@ TrackerImpl::stop() {
 
 }
 
-void
-TrackerImpl::processFrame(cv::Mat& output, cv::Mat& input) {
+std::shared_ptr<cv::Mat>
+TrackerImpl::processFrame(cv::Mat& input) {
 
-  cv::Mat gray = cv::Mat::zeros(input.size().height,
-                                input.size().width,
-                                CV_8UC1);
+  int w = input.size().width;
+  int h = input.size().height;
+
+  // Grayscales the image.
+  cv::Mat gray = cv::Mat::zeros(h, w, CV_8UC1);
   processing::grayscale(gray, input);
 
-  cv::Mat grayDownscaled = cv::Mat::zeros(input.size().height / 2,
-                                          input.size().width / 2,
-                                          CV_8UC1);
-  //processing::downscaleBy(grayDownscaled, gray, 2.0);
-  processing::downscaleBy(output, gray, 2.0);
+  // Downscales the image.
+  // It is important to note we do not downscale the image
+  // if it already has a low resolution.
+  double sFactor = std::min(w / TrackerImpl::MIN_SIZE,
+                            h / TrackerImpl::MIN_SIZE);
 
+  std::shared_ptr<cv::Mat> output = nullptr;
+  if (sFactor < 2.0) {
+    output = std::make_shared<cv::Mat>(h, w, CV_8UC1);
+    processing::binarize(*output, gray, processing::ThresholdType::OTSU);
+    return output;
+  }
 
-  //processing::binarize(output, grayDownscaled);
+  output = std::make_shared<cv::Mat>((int)(h / sFactor), (int)(w / sFactor), CV_8UC1);
+  auto scaled = cv::Mat((int)(h / sFactor), (int)(w / sFactor), CV_8UC1);
 
+  processing::downscaleBy(scaled, gray, sFactor);
+  processing::binarize(*output, scaled, processing::ThresholdType::OTSU);
+
+  return output;
 }
 
 }

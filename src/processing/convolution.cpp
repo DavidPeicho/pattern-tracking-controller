@@ -4,99 +4,53 @@ namespace ptc {
 
 namespace processing {
 
-int
-computeLocalTreshold(cv::Mat& input, int yInit, int xInit, int wSize) {
+namespace conv {
 
-  // This function implements the Sovola algorithm.
-  // TODO: One good optimization would be to use the Integral Images
-  // TODO: that brings this algorithm closer to a O(1) algorithm.
+KernelMat::KernelMat(std::vector<int> kernel, size_t size, double factor)
+          : kernel_{kernel}
+          , size_{size}
+          , factor_{factor}
+{ }
 
-  double mean = 0;
-  double meanSquare = 0;
-  double s = 0;
-  int count = 0;
-  for (int y = yInit - (wSize / 2); y <= yInit + (wSize / 2); ++y) {
-    for (int x = xInit - (wSize / 2); x <= xInit + (wSize / 2); ++x) {
-      if ((y >= 0 && x >= 0) && (y < input.rows && x < input.cols)) {
-        uint8_t& val = input.at<uchar>(y, x);
-        mean += val;
-        meanSquare += val * val;
-        count++;
-      }
-    }
-  }
+int&
+KernelMat::at(int y, int x) {
 
-  mean /= count;
-  meanSquare /= count;
-
-  s = sqrt(meanSquare - mean * mean);
-
-  return (int)(mean * (1 + 0.4 * ((s / 128.0) - 1)));
+  return kernel_[size_ * y + x];
 
 }
 
 void
-binarize(cv::Mat& output, cv::Mat& input) {
+applyConvolution(cv::Mat& output, cv::Mat& input, KernelMat& kernel) {
+
+  int half = (int)(kernel.getSize() / 2);
+
+  double factor = kernel.getFactor();
+  int sum = 0;
 
   for (int y = 0; y < input.rows; ++y) {
+
     for (int x = 0; x < input.cols; ++x) {
-      uint8_t& val = input.at<uchar>(y, x);
-      if (val >= computeLocalTreshold(input, y, x, 20)) {
-        output.at<uchar>(y, x) = 255;
-      } else {
-        output.at<uchar>(y, x) = 0;
+
+      for (int yy = - half; yy <= half; ++yy) {
+
+        for (int xx = - half; xx <= half; ++xx) {
+          if (x + xx < 0 || y + yy < 0 ||
+              x + xx >= input.cols || y + yy >= input.rows) {
+            continue;
+          }
+          uint8_t& val = input.at<uint8_t>(y + yy, x + xx);
+          sum += val * kernel.at(yy + half, xx + half);
+        }
       }
+
+      int pxValue = (int)(sum * factor);
+      output.at<uchar>(y, x) = (uint8_t)utils::maths::clamp(pxValue, 0, 255);
+
+      sum = 0;
     }
   }
 
 }
-
-void
-grayscale(cv::Mat& output, cv::Mat& input) {
-
-  for (int y = 0; y < input.rows; ++y) {
-    for (int x = 0; x < input.cols; ++x) {
-      auto& px = input.at<cv::Vec3b>(y, x);
-      uint8_t value = (uint8_t)(0.299 * px[2] + 0.587 * px[1] + 0.114 * px[0]);
-      output.at<uchar>(y, x) = value;
-    }
-  }
-
-}
-
-void
-downscaleBy(cv::Mat& output, cv::Mat& input, double factor) {
-
-  int prevX = 0;
-  int prevY = 0;
-  int nextX = 0;
-  int nextY = 0;
-
-  double prevRow = 0.0;
-  double nextRow = 0.0;
-  double totalLerp = 0.0;
-
-  for (int y = 0; y < output.rows; ++y) {
-    for (int x = 0; x < output.cols; ++x) {
-      double currX = (double)x * factor;
-      double currY = (double)y * factor;
-      prevX = utils::maths::clamp((int)floor(currX) - 1, 0, input.cols - 1);
-      nextX = utils::maths::clamp((int)ceil(currX) + 1, 0, input.cols - 1);
-      prevY = utils::maths::clamp((int)floor(currY) - 1, 0, input.rows - 1);
-      nextY = utils::maths::clamp((int)ceil(currY) + 1, 0, input.rows - 1);
-
-      prevRow = ((nextX - currX) / (nextX - prevX)) * input.at<uint8_t>(prevY,
-                                                                    prevX)
-              + ((currX - prevX) / (nextX - prevX)) * input.at<uint8_t>(prevY, nextX);
-      nextRow = ((nextX - currX) / (nextX - prevX)) * input.at<uint8_t>(nextY, prevX)
-                + ((currX - prevX) / (nextX - prevX)) * input.at<uint8_t>(nextY, nextX);
-      totalLerp = ((nextY - currY) / (nextY - prevY)) * prevRow
-                  + ((currY - prevY) / (nextY - prevY)) * nextRow;
-
-      output.at<uchar>(y, x) = (uint8_t)totalLerp;
-
-    }
-  }
 
 }
 

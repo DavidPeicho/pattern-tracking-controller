@@ -14,18 +14,24 @@ namespace ptc {
 class Tracker {
 
   public:
-    typedef std::shared_ptr<Tracker> Ptr;
-
-  public:
-    Ptr
     static inline
+    Tracker*
     instance() {
 
-      if (!instance_) {
-        instance_ = std::unique_ptr<Tracker>(new Tracker);
+      if (instance_ == nullptr) {
+        instance_ = new Tracker();
       }
       return instance_;
 
+    }
+
+    static inline
+    void
+    free() {
+      if (instance_ != nullptr) {
+        delete instance_;
+        instance_ = nullptr;
+      }
     }
 
   public:
@@ -41,8 +47,8 @@ class Tracker {
     void
     stop();
 
-    void
-    processFrame(cv::Mat& output, cv::Mat& input);
+    std::shared_ptr<cv::Mat>
+    processFrame(cv::Mat& input);
 
   private:
     Tracker();
@@ -50,13 +56,13 @@ class Tracker {
     Tracker& operator=(const Tracker&);
 
   private:
-    static Ptr instance_;
+    static Tracker* instance_;
 
   private:
-    std::unique_ptr<TrackerImpl> pimpl_;
+    std::shared_ptr<TrackerImpl> pimpl_;
 
 };
 
-Tracker::Ptr Tracker::instance_ = nullptr;
+Tracker* Tracker::instance_ = nullptr;
 
 }

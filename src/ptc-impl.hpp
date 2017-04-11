@@ -1,6 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include <input/video-reader.hpp>
+#include <processing/processing.hpp>
 #include <processing/convolution.hpp>
 
 namespace ptc {
@@ -17,11 +20,16 @@ class TrackerImpl {
     void
     stop();
 
-    void
-    processFrame(cv::Mat& output, cv::Mat& input);
+    std::shared_ptr<cv::Mat>
+    processFrame(cv::Mat& input);
 
-  public:
+  private:
+    static int MIN_SIZE;
+
+  private:
+
     VideoReader v_;
+
 
 };
 
