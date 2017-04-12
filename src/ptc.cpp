@@ -3,10 +3,16 @@
 
 namespace ptc {
 
-Tracker::Tracker()
-        : pimpl_{new TrackerImpl()} { }
+Tracker::~Tracker() {
 
-Tracker::~Tracker() { }
+}
+
+Tracker::Tracker()
+{
+
+  pimpl_ = std::make_shared<TrackerImpl>();
+
+}
 
 void
 Tracker::start() {
@@ -26,6 +32,13 @@ void
 Tracker::stop() {
 
   pimpl_->stop();
+
+}
+
+std::shared_ptr<cv::Mat>
+Tracker::processFrame(cv::Mat& input) {
+
+  return pimpl_->processFrame(input);
 
 }
 

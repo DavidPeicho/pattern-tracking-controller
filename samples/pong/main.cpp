@@ -1,17 +1,9 @@
 #include <ptc.hpp>
+#include <iostream>
 
 int main() {
-
-  auto tracker = ptc::Tracker::instance();
-  tracker->start();
-
-  /*while (true) {
-
-    tracker->update();
-
-  }*/
-
-  tracker->stop();
+  
+  std::cout << "Pong" << std::endl;
 
   return 0;
 
