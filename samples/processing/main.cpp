@@ -1,25 +1,52 @@
-#include <ptc.hpp>
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgcodecs/imgcodecs_c.h>
+
+#include <ptc.hpp>
+#include <opencv/cv.hpp>
 
 int main() {
 
   auto tracker = ptc::Tracker::instance();
-  cv::Mat frame;
 
-  //const char* imgPath = "assets/cat.png";
-  const char* imgPath = "assets/text.png";
+  ptc::event::InputProcessor processor;
+  processor.registerEvent(ptc::event::Event::DOWN, []() -> void {
 
-  frame = cv::imread(imgPath, CV_LOAD_IMAGE_COLOR);
+    std::cout << "DOWN" << std::endl;
 
-  if(!frame.data) {
-    std::cerr <<  "Could not open or find the image" << std::endl ;
-    return -1;
+  });
+
+  tracker->inputProcessor(processor);
+  tracker->start();
+
+  while (true) {
+
+    tracker->update();
+    auto& tmp = tracker->getRawFrame();
+    tracker->preprocessFrame(tmp);
+    auto& gray = tracker->getFrame(ptc::data::Frame::GRAY);
+    auto& blur = tracker->getFrame(ptc::data::Frame::BLURRED);
+    auto& bin = tracker->getFrame(ptc::data::Frame::BINARIZED);
+    auto found = tracker->processFrame(bin);
+
+    if(cv::waitKey(20) >= 0) break;
+
+    if (!found) {
+      cv::imshow("frame", tmp);
+      continue;
+    }
+
+    int h = tmp.size().height;
+    int w = tmp.size().width;
+    std::vector<std::vector<cv::Point>> c;
+    c.push_back(tracker->arrowShape());
+    cv::Mat result = cv::Mat::zeros(h, w, CV_8UC3);
+    tmp.copyTo(result);
+    cv::Scalar color = cv::Scalar(255, 0, 0);
+    drawContours(result, c, 0, color, 5, 8, std::vector<cv::Vec4i>(), 0,
+                 cv::Point());
+    cv::imshow("frame", result);
+
   }
-
-  auto outputPtr = tracker->processFrame(frame);
-  cv::imwrite("result.png", *outputPtr);
 
   tracker->free();
 

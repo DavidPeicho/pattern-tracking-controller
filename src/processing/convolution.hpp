@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <utils/utils.hpp>
+//#include <utils/logger.hpp>
 
 namespace ptc {
 
@@ -52,8 +53,32 @@ static KernelMat GAUSSIAN3_K({ 1, 2, 1,
                                1, 2, 1
                              }, 3, 0.0625);
 
+static KernelMat SHARPEN3_K({  -1, -1, -1,
+                              -1,  9, -1,
+                               -1, -1,  -1
+                             }, 3, 1.0);
+
+static KernelMat SOBELX_K({ 1, 0, -1,
+                            2, 0, -2,
+                            1, 0, -1
+                          }, 3, 1.0);
+
+static KernelMat SOBELY_K({  1,  2,  1,
+                             0,  0,  0,
+                            -1, -2, -1
+                          }, 3, 1.0);
+
 void
 applyConvolution(cv::Mat& output, cv::Mat& input, KernelMat& kernel);
+
+void
+applyBiconvolution(cv::Mat& output, cv::Mat& input,
+                   KernelMat& kernelA,
+                   KernelMat& kernelB,
+                   double (*biconvolution) (double a, double b));
+
+/*void
+applyCanny(cv::Mat& output, cv::Mat& input);*/
 
 }
 

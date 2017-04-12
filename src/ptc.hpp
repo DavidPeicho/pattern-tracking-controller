@@ -3,6 +3,9 @@
 #include <memory>
 #include <opencv2/core/mat.hpp>
 
+#include <data.hpp>
+#include <input-processor.hpp>
+
 namespace ptc {
 
   class TrackerImpl;
@@ -47,8 +50,25 @@ class Tracker {
     void
     stop();
 
-    std::shared_ptr<cv::Mat>
-    processFrame(cv::Mat& input);
+    void
+    preprocessFrame(const cv::Mat& input);
+
+    bool
+    processFrame(const cv::Mat& input);
+
+  public:
+    void
+    inputProcessor(event::InputProcessor i);
+
+  public:
+    const cv::Mat&
+    getRawFrame() const;
+
+    const cv::Mat&
+    getFrame(data::Frame frameType) const;
+
+    const std::vector<cv::Point>&
+    arrowShape() const;
 
   private:
     Tracker();
@@ -59,10 +79,12 @@ class Tracker {
     static Tracker* instance_;
 
   private:
-    std::shared_ptr<TrackerImpl> pimpl_;
+    event::InputProcessor         inputProcessor_;
+
+    std::shared_ptr<TrackerImpl>  pimpl_;
 
 };
 
 Tracker* Tracker::instance_ = nullptr;
   
-}
+} //
