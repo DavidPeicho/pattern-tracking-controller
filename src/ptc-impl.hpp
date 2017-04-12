@@ -6,6 +6,8 @@
 #include <processing/processing.hpp>
 #include <processing/convolution.hpp>
 
+#include <input/video-reader.hpp>
+
 namespace ptc {
 
 class TrackerImpl {
@@ -25,11 +27,9 @@ class TrackerImpl {
 
   private:
     static int MIN_SIZE;
-
+  
   private:
-
     VideoReader v_;
-
 
 };
 
