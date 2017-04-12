@@ -34,4 +34,18 @@ VideoReader::close() {
 
 }
 
+int
+VideoReader::getWidth() const {
+
+  return (int)vCapture_.get(CV_CAP_PROP_FRAME_WIDTH);
+
+}
+
+int
+VideoReader::getHeight() const {
+
+  return (int)vCapture_.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+}
+
 }

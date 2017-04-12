@@ -17,6 +17,13 @@ class VideoReader {
     cv::Mat
     nextFrame();
 
+  public:
+    int
+    getWidth() const;
+
+    int
+    getHeight() const;
+
   private:
     cv::VideoCapture vCapture_;
 

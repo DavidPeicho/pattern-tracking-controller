@@ -53,6 +53,11 @@ static KernelMat GAUSSIAN3_K({ 1, 2, 1,
                                1, 2, 1
                              }, 3, 0.0625);
 
+static KernelMat SHARPEN3_K({  -1, -1, -1,
+                              -1,  9, -1,
+                               -1, -1,  -1
+                             }, 3, 1.0);
+
 static KernelMat SOBELX_K({ 1, 0, -1,
                             2, 0, -2,
                             1, 0, -1
