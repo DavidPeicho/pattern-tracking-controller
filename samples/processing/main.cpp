@@ -8,8 +8,9 @@ int main() {
   auto tracker = ptc::Tracker::instance();
   cv::Mat frame;
 
-  //const char* imgPath = "assets/cat.png";
-  const char* imgPath = "assets/text.png";
+  const char* imgPath = "assets/cat.png";
+  //const char* imgPath = "assets/text.png";
+  //const char* imgPath = "assets/test.png";
 
   frame = cv::imread(imgPath, CV_LOAD_IMAGE_COLOR);
 

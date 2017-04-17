@@ -35,10 +35,25 @@ TrackerImpl::processFrame(cv::Mat& input) {
   cv::Mat gray = cv::Mat::zeros(h, w, CV_8UC1);
   processing::grayscale(gray, input);
 
+  // DEBUG
+  cv::Mat graySmoothed = cv::Mat::zeros(h, w, CV_8UC1);
+  processing::conv::applyConvolution(graySmoothed, gray,
+                                     processing::conv::GAUSSIAN5_K);
+  auto output = std::make_shared<cv::Mat>(h, w, CV_8UC1);
+  auto sobelConvolution = [](double a, double b) {
+    return sqrt(a * a + b * b);
+  };
+  processing::conv::applyBiconvolution(*output, graySmoothed,
+                                       processing::conv::SOBELX_K,
+                                       processing::conv::SOBELY_K,
+                                       sobelConvolution);
+  return output;
+  // END DEBUG
+
   // Downscales the image.
   // It is important to note we do not downscale the image
   // if it already has a low resolution.
-  double sFactor = std::min(w / TrackerImpl::MIN_SIZE,
+  /*double sFactor = std::min(w / TrackerImpl::MIN_SIZE,
                             h / TrackerImpl::MIN_SIZE);
 
   std::shared_ptr<cv::Mat> output = nullptr;
@@ -54,7 +69,7 @@ TrackerImpl::processFrame(cv::Mat& input) {
   processing::downscaleBy(scaled, gray, sFactor);
   processing::binarize(*output, scaled, processing::ThresholdType::OTSU);
 
-  return output;
+  return output;*/
 }
 
 }
