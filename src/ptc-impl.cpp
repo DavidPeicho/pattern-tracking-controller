@@ -216,6 +216,21 @@ TrackerImpl::init(int h, int w) {
   frames_.push_back(std::make_shared<cv::Mat>(h_, w_, CV_8UC1));
   frames_.push_back(std::make_shared<cv::Mat>(h_, w_, CV_8UC1));
 
+  // DEBUG
+  cv::Mat graySmoothed = cv::Mat::zeros(h, w, CV_8UC1);
+  processing::conv::applyConvolution(graySmoothed, gray,
+                                     processing::conv::GAUSSIAN5_K);
+  auto output = std::make_shared<cv::Mat>(h, w, CV_8UC1);
+  auto sobelConvolution = [](double a, double b) {
+    return sqrt(a * a + b * b);
+  };
+  processing::conv::applyBiconvolution(*output, graySmoothed,
+                                       processing::conv::SOBELX_K,
+                                       processing::conv::SOBELY_K,
+                                       sobelConvolution);
+  return output;
+  // END DEBUG
+
   // Downscales the image.
   // It is important to note we do not downscale the image
   // if it already has a low resolution.
