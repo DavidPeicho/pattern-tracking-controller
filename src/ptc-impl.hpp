@@ -6,7 +6,7 @@
 #include <processing/processing.hpp>
 #include <processing/convolution.hpp>
 
-#include <input/video-reader.hpp>
+#include <utils/logger.hpp>
 
 namespace ptc {
 

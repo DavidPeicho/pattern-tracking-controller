@@ -28,6 +28,9 @@ TrackerImpl::stop() {
 std::shared_ptr<cv::Mat>
 TrackerImpl::processFrame(cv::Mat& input) {
 
+  utils::Logger::instance()->enable(true);
+  utils::Logger::instance()->start("Begin frame processing...");
+
   int w = input.size().width;
   int h = input.size().height;
 
@@ -35,41 +38,43 @@ TrackerImpl::processFrame(cv::Mat& input) {
   cv::Mat gray = cv::Mat::zeros(h, w, CV_8UC1);
   processing::grayscale(gray, input);
 
-  // DEBUG
-  cv::Mat graySmoothed = cv::Mat::zeros(h, w, CV_8UC1);
-  processing::conv::applyConvolution(graySmoothed, gray,
-                                     processing::conv::GAUSSIAN5_K);
-  auto output = std::make_shared<cv::Mat>(h, w, CV_8UC1);
-  auto sobelConvolution = [](double a, double b) {
-    return sqrt(a * a + b * b);
-  };
-  processing::conv::applyBiconvolution(*output, graySmoothed,
-                                       processing::conv::SOBELX_K,
-                                       processing::conv::SOBELY_K,
-                                       sobelConvolution);
-  return output;
-  // END DEBUG
+  cv::Mat smoothedGray = cv::Mat::zeros(h, w, CV_8UC1);
+  processing::conv::applyConvolution(smoothedGray, gray, processing::conv::GAUSSIAN5_K);
 
   // Downscales the image.
   // It is important to note we do not downscale the image
   // if it already has a low resolution.
-  /*double sFactor = std::min(w / TrackerImpl::MIN_SIZE,
-                            h / TrackerImpl::MIN_SIZE);
+  double sFactor = std::min(w / (double)TrackerImpl::MIN_SIZE,
+                            h / (double)TrackerImpl::MIN_SIZE);
 
-  std::shared_ptr<cv::Mat> output = nullptr;
+  std::shared_ptr<cv::Mat> binarized = nullptr;
   if (sFactor < 2.0) {
-    output = std::make_shared<cv::Mat>(h, w, CV_8UC1);
-    processing::binarize(*output, gray, processing::ThresholdType::OTSU);
-    return output;
+    binarized = std::make_shared<cv::Mat>(h, w, CV_8UC1);
+    processing::binarize(*binarized, smoothedGray, processing::ThresholdType::OTSU);
+    utils::Logger::instance()->stop("End frame processing...");
+    return binarized;
   }
 
-  output = std::make_shared<cv::Mat>((int)(h / sFactor), (int)(w / sFactor), CV_8UC1);
   auto scaled = cv::Mat((int)(h / sFactor), (int)(w / sFactor), CV_8UC1);
+  processing::downscaleBy(scaled, smoothedGray, sFactor);
 
-  processing::downscaleBy(scaled, gray, sFactor);
-  processing::binarize(*output, scaled, processing::ThresholdType::OTSU);
+  binarized = std::make_shared<cv::Mat>((int)(h / sFactor), (int)(w / sFactor), CV_8UC1);
+  processing::binarize(*binarized, scaled, processing::ThresholdType::VALUE);
 
-  return output;*/
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i>              hierarchy;
+
+  findContours(*binarized, contours, hierarchy, CV_RETR_EXTERNAL,
+               CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+
+  std::vector<std::vector<cv::Point> > contoursPoly(contours.size());
+  for (size_t i = 0; i < contours.size(); ++i) {
+    approxPolyDP(cv::Mat(contours[i]), contoursPoly[i], 3, true );
+  }
+
+  utils::Logger::instance()->stop("End frame processing...");
+
+  return binarized;
 }
 
 }

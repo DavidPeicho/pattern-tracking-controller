@@ -13,6 +13,7 @@ namespace ptc {
 namespace processing {
 
 enum ThresholdType {
+  VALUE,
   SAUVOLA,
   OTSU
 };

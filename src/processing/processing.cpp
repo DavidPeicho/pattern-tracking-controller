@@ -7,8 +7,8 @@ namespace processing {
 uint8_t
 computeOtsuThreshold(cv::Mat& input) {
 
-  std::vector<int> histogram;
-  histogram.resize(256, 0);
+  int* histogram = new int[256];
+  for (size_t i = 0; i < 256; ++i) histogram[i] = 0;
 
   // Builds histogram
   for (int y = 0; y < input.rows; ++y) {
@@ -48,6 +48,9 @@ computeOtsuThreshold(cv::Mat& input) {
       max = between;
     }
   }
+
+  delete[] histogram;
+
   return (uint8_t)((t1 + t2) / 2.0);
 
 }
@@ -86,7 +89,7 @@ computeSauvolaThreshold(cv::Mat& input, int yInit, int xInit, int wSize) {
 void
 binarize(cv::Mat& output, cv::Mat& input, ThresholdType thresholdType) {
 
-  uint8_t threshold = 127;
+  uint8_t threshold = 10;
   if (thresholdType == ThresholdType::OTSU) {
     threshold = computeOtsuThreshold(input);
   }

@@ -1,16 +1,18 @@
-#include <ptc.hpp>
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
+
+#include <ptc.hpp>
 
 int main() {
 
   auto tracker = ptc::Tracker::instance();
   cv::Mat frame;
 
-  const char* imgPath = "assets/cat.png";
+  //const char* imgPath = "assets/cat.png";
   //const char* imgPath = "assets/text.png";
   //const char* imgPath = "assets/test.png";
+  const char* imgPath = "assets/scene.png";
 
   frame = cv::imread(imgPath, CV_LOAD_IMAGE_COLOR);
 
@@ -19,7 +21,9 @@ int main() {
     return -1;
   }
 
-  auto outputPtr = tracker->processFrame(frame);
+  while (true) {
+    auto outputPtr = tracker->processFrame(frame);
+  }
   cv::imwrite("result.png", *outputPtr);
 
   tracker->free();

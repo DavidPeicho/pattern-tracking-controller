@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <utils/utils.hpp>
+//#include <utils/logger.hpp>
 
 namespace ptc {
 
@@ -70,6 +71,9 @@ applyBiconvolution(cv::Mat& output, cv::Mat& input,
                    KernelMat& kernelA,
                    KernelMat& kernelB,
                    double (*biconvolution) (double a, double b));
+
+/*void
+applyCanny(cv::Mat& output, cv::Mat& input);*/
 
 }
 

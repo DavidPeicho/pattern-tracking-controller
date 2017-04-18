@@ -93,6 +93,69 @@ applyBiconvolution(cv::Mat& output, cv::Mat& input,
 
 }
 
+/*void
+applyCanny(cv::Mat& output, cv::Mat& input) {
+
+  //(utils::Logger::instance()*) << "Begin canny computing on ";
+
+  int h = output.size().height;
+  int w = output.size().width;
+
+  // Begins by removing noise from the original image
+  cv::Mat smoothed = cv::Mat::zeros(h, w, CV_8UC1);
+  processing::conv::applyConvolution(smoothed, input, GAUSSIAN5_K);
+
+  cv::Mat sobelX = cv::Mat::zeros(h, w, CV_8UC1);
+  cv::Mat sobelY = cv::Mat::zeros(h, w, CV_8UC1);
+  cv::Mat g = cv::Mat::zeros(h, w, CV_8UC1);
+
+  applyConvolution(sobelX, smoothed, SOBELX_K);
+  applyConvolution(sobelY, smoothed, SOBELY_K);
+
+  for (int y = 0; y < input.rows; ++y) {
+    for (int x = 0; x < input.cols; ++x) {
+      uint8_t sx = sobelX.at<uint8_t>(y, x);
+      uint8_t sy = sobelY.at<uint8_t>(y, x);
+      g.at<uint8_t>(y, x) = (uint8_t) hypot(sx, sy);
+    }
+  }
+
+  // Non-maximum suppression
+  for (int y = 1; y < h - 1; y++) {
+    for (int x = 1; x < w - 1; x++) {
+      auto val = g.at<uint8_t>(y, x);
+
+      auto sx = sobelX.at<uint8_t>(y, x);
+      auto sy = sobelY.at<uint8_t>(y, x);
+
+      const float dir =
+        (float) (fmod(atan2(sy, sx) + M_PI, M_PI) / M_PI) * 8.0f;
+
+      auto nn = g.at<uint8_t>(y - 1, x);
+      auto ss = g.at<uint8_t>(y + 1, x);
+      auto ee = g.at<uint8_t>(y, x - 1);
+      auto ww = g.at<uint8_t>(y, x + 1);
+      auto nw = g.at<uint8_t>(y - 1, x + 1);
+      auto ne = g.at<uint8_t>(y - 1, x - 1);
+      auto sw = g.at<uint8_t>(y + 1, x + 1);
+      auto se = g.at<uint8_t>(y + 1, x - 1);
+
+      if (((dir <= 1.0 || dir > 7.0) && val > ee &&
+           val > ww) ||
+          ((dir > 1 && dir <= 3) && val > nw &&
+           val > se) ||
+          ((dir > 3 && dir <= 5) && val > nn &&
+           val > ss) ||
+          ((dir > 5 && dir <= 7) && val > ne &&
+           val > sw))
+        output.at<uint8_t>(y, x) = val;
+      else
+        output.at<uint8_t>(y, x) = 0;
+    }
+  }
+
+}*/
+
 }
 
 }
