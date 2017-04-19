@@ -90,6 +90,32 @@ namespace ptc {
     }
 
     void
+    integralImage(cv::Mat &output, cv::Mat &input) {
+      grayscale(output, input);
+      for (int y = 1; y < output.rows; ++y)
+        output.at<uchar>(y, 0) += output.at<uchar>(y - 1, 0);
+      for (int x = 1; x < output.cols; ++x)
+        output.at<uchar>(0, x) += output.at<uchar>(0, x - 1);
+      for (int y = 1; y < output.rows; ++y)
+        for (int x = 1; x < output.cols; ++x)
+          output.at<uchar>(y, x) += output.at<uchar>(y - 1, x) + output.at<uchar>(y, x - 1);
+    }
+
+    double
+    getBoxIntegral(cv::Mat &data, int row, int col, int rows, int cols) {
+      float A = 0, B = 0, C = 0, D = 0;
+      int r1 = std::min(row, data.size().height - 1);
+      int c1 = std::min(row, data.size().width - 1);
+      int r2 = std::min(row + rows, data.size().height - 1);
+      int c2 = std::min(col + cols, data.size().width - 1);
+      if (r1 >= 0 && c1 >= 0) A = data.at<uchar>(r1, c1);
+      if (r1 >= 0 && c2 >= 0) B = data.at<uchar>(r1, c2);
+      if (r2 >= 0 && c1 >= 0) C = data.at<uchar>(r2, c1);
+      if (r2 >= 0 && c2 >= 0) D = data.at<uchar>(r2, c2);
+      return std::max(0.f, A - B - C + D);
+    }
+
+    void
     binarize(cv::Mat& output, cv::Mat& input, ThresholdType thresholdType) {
 
       uint8_t threshold = 10;
@@ -145,14 +171,14 @@ namespace ptc {
 
       for (int y = 0; y < output.rows; ++y) {
         for (int x = 0; x < output.cols; ++x) {
-          double currX = (double) x * factor;
-          double currY = (double) y * factor;
+          double currX = (double)x * factor;
+          double currY = (double)y * factor;
 
           // Gets derivatives x and y positions
-          prevX = utils::maths::clamp((int) floor(currX - 1), 0, input.cols - 1);
-          nextX = utils::maths::clamp((int) ceil(currX + 1), 0, input.cols - 1);
-          prevY = utils::maths::clamp((int) floor(currY - 1), 0, input.rows - 1);
-          nextY = utils::maths::clamp((int) ceil(currY + 1), 0, input.rows - 1);
+          prevX = utils::maths::clamp((int)floor(currX - 1), 0, input.cols - 1);
+          nextX = utils::maths::clamp((int)ceil(currX + 1), 0, input.cols - 1);
+          prevY = utils::maths::clamp((int)floor(currY - 1), 0, input.rows - 1);
+          nextY = utils::maths::clamp((int)ceil(currY + 1), 0, input.rows - 1);
 
           // Gets each 4 points value in the original image
           p1 = input.at<uint8_t>(prevY, prevX);
@@ -167,38 +193,10 @@ namespace ptc {
           totalLerp = ((nextY - currY) / (nextY - prevY)) * prevRow
                       + ((currY - prevY) / (nextY - prevY)) * nextRow;
 
-          output.at<uchar>(y, x) = (uint8_t) totalLerp;
+          output.at<uchar>(y, x) = (uint8_t)totalLerp;
 
         }
       }
-
-    }
-
-    void
-    integralImage(cv::Mat &output, cv::Mat &input) {
-      grayscale(output, input);
-      for (int y = 1; y < output.rows; ++y)
-        output.at<uchar>(y, 0) += output.at<uchar>(y - 1, 0);
-      for (int x = 1; x < output.cols; ++x)
-        output.at<uchar>(0, x) += output.at<uchar>(0, x - 1);
-      for (int y = 1; y < output.rows; ++y)
-        for (int x = 1; x < output.cols; ++x)
-          output.at<uchar>(y, x) += output.at<uchar>(y - 1, x) + output.at<uchar>(y, x - 1);
-    }
-
-    double
-    getBoxIntegral(cv::Mat &data, int row, int col, int rows, int cols) {
-      float A = 0, B = 0, C = 0, D = 0;
-      int r1 = std::min(row, data.size().height - 1);
-      int c1 = std::min(row, data.size().width - 1);
-      int r2 = std::min(row + rows, data.size().height - 1);
-      int c2 = std::min(col + cols, data.size().width - 1);
-      if (r1 >= 0 && c1 >= 0) A = data.at<uchar>(r1, c1);
-      if (r1 >= 0 && c2 >= 0) B = data.at<uchar>(r1, c2);
-      if (r2 >= 0 && c1 >= 0) C = data.at<uchar>(r2, c1);
-      if (r2 >= 0 && c2 >= 0) D = data.at<uchar>(r2, c2);
-      return std::max(0.f, A - B - C + D);
-
 
     }
 
