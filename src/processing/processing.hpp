@@ -33,6 +33,9 @@ grayscale(cv::Mat& output, cv::Mat& input);
 void
 downscaleBy(cv::Mat& output, cv::Mat& input, double factor);
 
+void
+integralImage(cv::Mat &output, cv::Mat& input);
+
 }
 
 }
