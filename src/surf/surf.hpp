@@ -4,9 +4,16 @@
 
 #pragma once 
 
+namespace ptc {
 
-class surf {
+  namespace surf {
 
-};
+    class Surf {
+
+    };
+
+  }
+
+}
 
 
