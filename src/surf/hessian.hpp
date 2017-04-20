@@ -7,6 +7,7 @@
 #include <vector>
 #include <opencv2/core/matx.hpp>
 #include <opencv2/core/mat.hpp>
+#include <memory>
 
 namespace ptc {
 
@@ -20,6 +21,9 @@ namespace ptc {
       private:
       static void getInterestPoints(cv::Mat &img, std::vector<cv::Vec2i> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep);
+      static void getResponseLayer(cv::Mat &img, int step, int filterSize);
+      static double getBoxIntegral(cv::Mat &img, int row, int col, int rows, int cols);
+
     };
 
   }
