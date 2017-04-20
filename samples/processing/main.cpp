@@ -3,6 +3,8 @@
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 
 #include <ptc.hpp>
+#include <unistd.h>
+#include <surf/hessian.hpp>
 
 int main() {
 
@@ -21,9 +23,9 @@ int main() {
     return -1;
   }
 
-  while (true) {
-    auto outputPtr = tracker->processFrame(frame);
-  }
+  ptc::surf::Hessian::hessian(frame, 4, 4, 2);
+
+  auto outputPtr = tracker->processFrame(frame);
   cv::imwrite("result.png", *outputPtr);
 
   tracker->free();
