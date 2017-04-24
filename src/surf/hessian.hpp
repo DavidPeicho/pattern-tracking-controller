@@ -44,6 +44,7 @@ namespace ptc {
       CvMat *hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                               std::shared_ptr<ResponseLayer> b);
 
+
       private:
       int _nbOctaves;
       int _intervalsPerOctave;

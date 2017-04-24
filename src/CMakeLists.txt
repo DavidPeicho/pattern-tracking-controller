@@ -5,6 +5,7 @@ find_package(OpenCV REQUIRED)
 add_subdirectory(input)
 add_subdirectory(processing)
 add_subdirectory(utils)
+add_subdirectory(surf)
 
 add_library(ptc SHARED ${PTC_SOURCES})
 

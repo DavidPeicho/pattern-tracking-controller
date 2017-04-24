@@ -8,4 +8,6 @@ set(PTC_SOURCES ${PTC_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/response-layer.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/response-layer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/interest-point.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/utils.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
         PARENT_SCOPE)
