@@ -1,9 +1,11 @@
-set(PTC_SOURCES ptc.cpp ptc-impl.cpp surf/surf.cpp surf/surf.hpp surf/hessian.cpp surf/hessian.hpp)
+set(PTC_SOURCES ptc.cpp ptc-impl.cpp
+        )
 
 find_package(OpenCV REQUIRED)
 
 add_subdirectory(input)
 add_subdirectory(processing)
+add_subdirectory(surf)
 add_subdirectory(utils)
 
 add_library(ptc SHARED ${PTC_SOURCES})
