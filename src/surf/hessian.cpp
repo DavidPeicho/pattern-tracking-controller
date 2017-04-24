@@ -48,10 +48,15 @@ namespace ptc {
 
     double Hessian::getBoxIntegral(cv::Mat &img, int row, int col, int rows, int cols) {
       // The subtraction by one for row/col is because row/col is inclusive.
-      float A = img.at<uchar>(row, col);
-      float B = img.at<uchar>(row, col + cols);
-      float C = img.at<uchar>(row + rows, col);
-      float D = img.at<uchar>(row + rows, cols);
+      float A = 0, B = 0, C = 0, D = 0;
+      int r1 = std::min(row, img.size().height - 1);
+      int c1 = std::min(row, img.size().width - 1);
+      int r2 = std::min(row + rows, img.size().height - 1);
+      int c2 = std::min(col + cols, img.size().width - 1);
+      if (r1 >= 0 && c1 >= 0) A = img.at<uchar>(r1, c1);
+      if (r1 >= 0 && c2 >= 0) B = img.at<uchar>(r1, c2);
+      if (r2 >= 0 && c1 >= 0) C = img.at<uchar>(r2, c1);
+      if (r2 >= 0 && c2 >= 0) D = img.at<uchar>(r2, c2);
       return std::max(0.f, A - B - C + D);
     }
 
@@ -60,8 +65,8 @@ namespace ptc {
       int band = filterSize / 9 * 5;
       double Dxx, Dxy, Dyy;
       double nFactor = 1 / (filterSize * filterSize);
-      for (int j = 0; j < img.size().height; j++)
-        for (int i = 0; i < img.size().width; i++ ) {
+      for (int j = 0; j * step < img.size().height; j++)
+        for (int i = 0; i * step < img.size().width; i++ ) {
           int r = j * step;
           int c = i * step;
           Dxx = getBoxIntegral(img, r - lobe + 1, c - band, 2 * lobe - 1, filterSize)

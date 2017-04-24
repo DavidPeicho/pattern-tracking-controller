@@ -23,7 +23,10 @@ int main() {
     return -1;
   }
 
-  ptc::surf::Hessian::hessian(frame, 4, 4, 2);
+  auto ip = ptc::surf::Hessian::hessian(frame, 4, 4, 2);
+  for (auto e : ip) {
+    std::cout << e << std::endl;
+  }
 
   auto outputPtr = tracker->processFrame(frame);
   cv::imwrite("result.png", *outputPtr);
