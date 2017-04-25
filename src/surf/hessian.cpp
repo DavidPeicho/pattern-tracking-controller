@@ -4,6 +4,7 @@
 
 #include <processing/processing.hpp>
 #include "hessian.hpp"
+#include "ResponseMap.hpp"
 
 
 namespace ptc {
@@ -21,30 +22,11 @@ namespace ptc {
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep)
     {
       int step = initSamplingStep;
-      int filterSize = 9;
       int w = img.cols;
       int h = img.rows;
-      int filterSizeIncrease = 6;
       std::vector<cv::Mat*> layers;
-      for (int j = 0; j < 2; j++) {
-        auto layer = new cv::Mat(w, h, img.type());
-        getResponseLayer(*layer, step, filterSize);
-        filterSize += filterSizeIncrease;
-        layers.push_back(layer);
-      }
-      for (int i = 1; i < nbOctaves; ++i) {
-        for (int j = 0; j < 2; j++) {
-          auto layer = new cv::Mat(w, h, img.type());
-          getResponseLayer(*layer, step, filterSize);
-          layers.push_back(layer);
-          filterSize += filterSizeIncrease;
-        }
-        step *= 2;
-        w /= 2;
-        h /= 2;
-        filterSizeIncrease *= 2;
-      }
-      static const int filter_map [5][4] = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}, {7,9,10,11}};
+      ResponseMap rm(img, nbOctaves, intervalsPerOctave);
+      rm.printResponseInfo();
       /*
       for (int i = 0; i < nbOctaves; ++i) {
         auto b = layers.at(4 * i);

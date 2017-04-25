@@ -5,7 +5,7 @@
 #pragma once 
 
 #include <vector>
-#include "Octave.hpp"
+#include "ResponseLayer.hpp"
 #include <memory>
 
 namespace ptc {
@@ -13,14 +13,17 @@ namespace ptc {
 
     class ResponseMap {
       public:
-      ResponseMap(int nbOctaves, int initialStep) : _nbOctaves(nbOctaves), _initialStep(initialStep) {}
+      ResponseMap(cv::Mat &img, int nbOctaves, int nbIntervals);
+
+      public:
+      void printResponseInfo();
+
+      public:
+      std::vector<std::shared_ptr<ResponseLayer>> layers;
 
       private:
-      std::vector<std::shared_ptr<Octave>> octaves;
       int _nbOctaves;
-      int _initialStep;
-
+      int _nbIntervals;
     };
-
   }
 }
