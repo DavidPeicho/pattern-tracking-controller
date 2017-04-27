@@ -1,4 +1,5 @@
-set(PTC_SOURCES ptc.cpp ptc-impl.cpp input-processor.cpp surf/surf.cpp surf/surf.hpp surf/hessian.cpp surf/hessian.hpp)
+set(PTC_SOURCES ptc.cpp ptc-impl.cpp input-processor.cpp surf/surf.cpp surf/surf.hpp surf/hessian.cpp surf/hessian.hpp
+        surf/response-layer.cpp)
 
 find_package(OpenCV REQUIRED)
 

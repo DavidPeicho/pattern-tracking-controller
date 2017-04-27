@@ -5,6 +5,7 @@
 #pragma once 
 
 #include <vector>
+#include "Octave.hpp"
 #include "response-layer.hpp"
 #include <memory>
 
@@ -24,6 +25,8 @@ namespace ptc {
       private:
       int _nbOctaves;
       int _nbIntervals;
+
     };
+
   }
 }

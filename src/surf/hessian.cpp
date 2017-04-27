@@ -83,19 +83,6 @@ namespace ptc {
         );
         featurePoints.push_back(ipt);
       }
-      static const int filter_map [5][4] = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}, {7,9,10,11}};
-      /*
-      for (int i = 0; i < nbOctaves; ++i) {
-        auto b = layers.at(4 * i);
-        auto m = layers.at(4 * i + 1);
-        auto t = layers.at(4 * i + 2);
-        for (int r = 0; r < m->size().height; ++r) {
-          for (int c = 0; c < m->size().width; ++c) {
-
-          }
-        }
-      }
-      */
     }
 
 //-------------------------------------------------------
@@ -178,7 +165,6 @@ namespace ptc {
 
       return H;
     }
-
   }
 }
 
