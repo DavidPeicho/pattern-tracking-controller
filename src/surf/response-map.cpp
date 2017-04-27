@@ -8,7 +8,7 @@
 namespace ptc {
   namespace surf {
 
-    response::response(cv::Mat &img, int nbOctaves, int nbIntervals) :
+    ResponseMap::ResponseMap(cv::Mat &img, int nbOctaves, int nbIntervals) :
       _nbOctaves(nbOctaves), _nbIntervals(nbIntervals)
     {
       int filterSize = 9;
@@ -43,7 +43,7 @@ namespace ptc {
       }
     }
 
-    void response::printResponseInfo() {
+    void ResponseMap::printResponseInfo() {
       int i = 0;
       int octaveNb = 0;
       for (auto e : layers) {

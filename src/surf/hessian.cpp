@@ -21,7 +21,7 @@ namespace ptc {
     void Hessian::getInterestPoints(cv::Mat &img, std::vector<cv::Vec2i> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep)
     {
-      response rm(img, nbOctaves, intervalsPerOctave);
+      ResponseMap rm(img, nbOctaves, intervalsPerOctave);
       rm.printResponseInfo();
       for (int i = 0; i < nbOctaves; i++) {
         for (int j = 0; j + 2 < intervalsPerOctave; j++) {

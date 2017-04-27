@@ -11,9 +11,9 @@
 namespace ptc {
   namespace surf {
 
-    class response {
+    class ResponseMap {
       public:
-      response(cv::Mat &img, int nbOctaves, int nbIntervals);
+      ResponseMap(cv::Mat &img, int nbOctaves, int nbIntervals);
 
       public:
       void printResponseInfo();
