@@ -5,15 +5,15 @@
 #pragma once 
 
 #include <vector>
-#include "ResponseLayer.hpp"
+#include "response-layer.hpp"
 #include <memory>
 
 namespace ptc {
   namespace surf {
 
-    class ResponseMap {
+    class response {
       public:
-      ResponseMap(cv::Mat &img, int nbOctaves, int nbIntervals);
+      response(cv::Mat &img, int nbOctaves, int nbIntervals);
 
       public:
       void printResponseInfo();

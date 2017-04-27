@@ -1,5 +1,5 @@
 set(PTC_SOURCES ptc.cpp ptc-impl.cpp
-        )
+        surf/response-layer.cpp)
 
 find_package(OpenCV REQUIRED)
 

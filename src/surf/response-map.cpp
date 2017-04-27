@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ResponseMap.hpp"
+#include "response-map.hpp"
 
 //
 // Created by leo on 4/25/17.
@@ -8,7 +8,7 @@
 namespace ptc {
   namespace surf {
 
-    ResponseMap::ResponseMap(cv::Mat &img, int nbOctaves, int nbIntervals) :
+    response::response(cv::Mat &img, int nbOctaves, int nbIntervals) :
       _nbOctaves(nbOctaves), _nbIntervals(nbIntervals)
     {
       int filterSize = 9;
@@ -43,7 +43,7 @@ namespace ptc {
       }
     }
 
-    void ResponseMap::printResponseInfo() {
+    void response::printResponseInfo() {
       int i = 0;
       int octaveNb = 0;
       for (auto e : layers) {

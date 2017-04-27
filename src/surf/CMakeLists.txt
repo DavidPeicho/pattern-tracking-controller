@@ -3,8 +3,7 @@ set(PTC_SOURCES ${PTC_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/surf.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hessian.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/hessian.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ResponseMap.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Octave.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ResponseLayer.hpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ResponseMap.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/response-map.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/response-layer.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/response-map.cpp
         PARENT_SCOPE)
