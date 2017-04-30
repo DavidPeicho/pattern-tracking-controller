@@ -68,8 +68,8 @@ namespace ptc {
     }
 
     //! Interpolate scale-space extrema to subpixel accuracy to form an image feature.
-    void Hessian::interpolateExtremum(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
-                                      std::shared_ptr<ResponseLayer> b, std::vector<InterestPoint> &featurePoints)
+    void Hessian::interpolateExtremum(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
+                                      std::shared_ptr<ResponseLayer> t, std::vector<InterestPoint> &featurePoints)
     {
       // get the step distance between filters
       // check the middle filter is mid way between top and bottom
@@ -96,8 +96,8 @@ namespace ptc {
 //-------------------------------------------------------
 
 //! Performs one step of extremum interpolation.
-    void Hessian::interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
-                                  std::shared_ptr<ResponseLayer> b,
+    void Hessian::interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
+                                  std::shared_ptr<ResponseLayer> t,
                                   double* xi, double* xr, double* xc )
     {
       CvMat* dD, * H, * H_inv, X;
@@ -122,8 +122,8 @@ namespace ptc {
 //-------------------------------------------------------
 
     //! Computes the partial derivatives in x, y, and scale of a pixel.
-    CvMat* Hessian::deriv3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
-                            std::shared_ptr<ResponseLayer> b)
+    CvMat* Hessian::deriv3D(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
+                            std::shared_ptr<ResponseLayer> t)
     {
       CvMat* dI;
       double dx, dy, ds;
@@ -143,8 +143,8 @@ namespace ptc {
 //-------------------------------------------------------
 
 //! Computes the 3D Hessian matrix for a pixel.
-    CvMat* Hessian::hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
-                              std::shared_ptr<ResponseLayer> b)
+    CvMat* Hessian::hessian3D(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
+                              std::shared_ptr<ResponseLayer> t)
     {
       CvMat* H;
       double v, dxx, dyy, dss, dxy, dxs, dys;

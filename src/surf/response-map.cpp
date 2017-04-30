@@ -26,6 +26,7 @@ namespace ptc {
       int previousSize = nbIntervals;
       int added = 0;
       for (int i = 1; i < nbOctaves; ++i) {
+        filterSize += filterSizeIncrease;
         filterSizeIncrease *= 2;
         w /= 2;
         h /= 2;
