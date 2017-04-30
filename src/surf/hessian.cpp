@@ -6,12 +6,10 @@
 #include "hessian.hpp"
 #include "response-map.hpp"
 
-
 namespace ptc {
   namespace surf {
 
-    void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints)
-    {
+    void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints) {
       cv::Mat copy(img.size(), img.type());
       cv::integral(img, copy);
       ResponseMap rm(copy, _nbOctaves, _intervalsPerOctave);
@@ -47,12 +45,12 @@ namespace ptc {
 
       int btscale = b->data->size().width / t->data->size().width;
 
-      for (int rr = -1; rr <=1; ++rr)
-        for (int cc = -1; cc <=1; ++cc) {
+      for (int rr = -1; rr <= 1; ++rr)
+        for (int cc = -1; cc <= 1; ++cc) {
           // if any response in 3x3x3 is greater candidate not maximum
-          if (t->data->at<uchar>(r+rr, c+cc) >= candidate ||
-              ((rr != 0 || cc != 0) && m->data->at<uchar>((r+rr) * mtscale, (c+cc) * mtscale) >= candidate) ||
-              b->data->at<uchar>((r+rr) * btscale, (c+cc) * btscale) >= candidate)
+          if (t->data->at<uchar>(r + rr, c + cc) >= candidate ||
+              ((rr != 0 || cc != 0) && m->data->at<uchar>((r + rr) * mtscale, (c + cc) * mtscale) >= candidate) ||
+              b->data->at<uchar>((r + rr) * btscale, (c + cc) * btscale) >= candidate)
             return 0;
         }
 
@@ -61,8 +59,7 @@ namespace ptc {
 
     //! Interpolate scale-space extrema to subpixel accuracy to form an image feature.
     void Hessian::interpolateExtremum(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
-                                      std::shared_ptr<ResponseLayer> t, std::vector<InterestPoint> &featurePoints)
-    {
+                                      std::shared_ptr<ResponseLayer> t, std::vector<InterestPoint> &featurePoints) {
       // get the step distance between filters
       // check the middle filter is mid way between top and bottom
       int filterStep = (m->getFilterSize() - b->getFilterSize());
@@ -70,16 +67,15 @@ namespace ptc {
 
       // Get the offsets to the actual location of the extremum
       double xi = 0, xr = 0, xc = 0;
-      interpolateStep(r, c, t, m, b, &xi, &xr, &xc );
+      interpolateStep(r, c, t, m, b, &xi, &xr, &xc);
 
       // If point is sufficiently close to the actual extremum
-      if( fabs(xi) < 0.5f  &&  fabs(xr) < 0.5f  &&  fabs(xc) < 0.5f )
-      {
+      if (fabs(xi) < 0.5f && fabs(xr) < 0.5f && fabs(xc) < 0.5f) {
         InterestPoint ipt(
             static_cast<int>((c + xc) * t->getStep()),
             static_cast<int>((r + xr) * t->getStep()),
             static_cast<float>((0.1333f) * (m->getStep() + xi * filterStep)),
-            static_cast<int>(m->getLaplacian(r,c,t))
+            static_cast<int>(m->getLaplacian(r, c, t))
         );
         featurePoints.push_back(ipt);
       }
@@ -90,21 +86,20 @@ namespace ptc {
 //! Performs one step of extremum interpolation.
     void Hessian::interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
                                   std::shared_ptr<ResponseLayer> t,
-                                  double* xi, double* xr, double* xc )
-    {
-      CvMat* dD, * H, * H_inv, X;
-      double x[3] = { 0 };
+                                  double *xi, double *xr, double *xc) {
+      CvMat *dD, *H, *H_inv, X;
+      double x[3] = {0};
 
-      dD = deriv3D( r, c, t, m, b );
-      H = hessian3D( r, c, t, m, b );
-      H_inv = cvCreateMat( 3, 3, CV_64FC1 );
-      cvInvert( H, H_inv, CV_SVD );
-      cvInitMatHeader( &X, 3, 1, CV_64FC1, x, CV_AUTOSTEP );
-      cvGEMM( H_inv, dD, -1, NULL, 0, &X, 0 );
+      dD = deriv3D(r, c, t, m, b);
+      H = hessian3D(r, c, t, m, b);
+      H_inv = cvCreateMat(3, 3, CV_64FC1);
+      cvInvert(H, H_inv, CV_SVD);
+      cvInitMatHeader(&X, 3, 1, CV_64FC1, x, CV_AUTOSTEP);
+      cvGEMM(H_inv, dD, -1, NULL, 0, &X, 0);
 
-      cvReleaseMat( &dD );
-      cvReleaseMat( &H );
-      cvReleaseMat( &H_inv );
+      cvReleaseMat(&dD);
+      cvReleaseMat(&H);
+      cvReleaseMat(&H_inv);
 
       *xi = x[2];
       *xr = x[1];
@@ -114,20 +109,19 @@ namespace ptc {
 //-------------------------------------------------------
 
     //! Computes the partial derivatives in x, y, and scale of a pixel.
-    CvMat* Hessian::deriv3D(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
-                            std::shared_ptr<ResponseLayer> t)
-    {
-      CvMat* dI;
+    CvMat *Hessian::deriv3D(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
+                            std::shared_ptr<ResponseLayer> t) {
+      CvMat *dI;
       double dx, dy, ds;
 
       dx = (m->getDataAtScaled(r, c + 1, t) - m->getDataAtScaled(r, c - 1, t)) / 2.0;
       dy = (m->getDataAtScaled(r + 1, c, t) - m->getDataAtScaled(r - 1, c, t)) / 2.0;
       ds = (t->getDataAt(r, c) - b->getDataAtScaled(r, c, t)) / 2.0;
 
-      dI = cvCreateMat( 3, 1, CV_64FC1 );
-      cvmSet( dI, 0, 0, dx );
-      cvmSet( dI, 1, 0, dy );
-      cvmSet( dI, 2, 0, ds );
+      dI = cvCreateMat(3, 1, CV_64FC1);
+      cvmSet(dI, 0, 0, dx);
+      cvmSet(dI, 1, 0, dy);
+      cvmSet(dI, 2, 0, ds);
 
       return dI;
     }
@@ -135,36 +129,35 @@ namespace ptc {
 //-------------------------------------------------------
 
 //! Computes the 3D Hessian matrix for a pixel.
-    CvMat* Hessian::hessian3D(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
-                              std::shared_ptr<ResponseLayer> t)
-    {
-      CvMat* H;
+    CvMat *Hessian::hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+                              std::shared_ptr<ResponseLayer> b) {
+      CvMat *H;
       double v, dxx, dyy, dss, dxy, dxs, dys;
 
       v = m->getDataAtScaled(r, c, t);
       dxx = m->getDataAtScaled(r, c + 1, t) + m->getDataAtScaled(r, c - 1, t) - 2 * v;
       dyy = m->getDataAtScaled(r + 1, c, t) + m->getDataAtScaled(r - 1, c, t) - 2 * v;
       dss = t->getDataAt(r, c) + b->getDataAtScaled(r, c, t) - 2 * v;
-      dxy = ( m->getDataAtScaled(r + 1, c + 1, t) - m->getDataAtScaled(r + 1, c - 1, t) -
-              m->getDataAtScaled(r - 1, c + 1, t) + m->getDataAtScaled(r - 1, c - 1, t) ) / 4.0;
-      dxs = ( t->getDataAt(r, c + 1) - t->getDataAt(r, c - 1) -
-              b->getDataAtScaled(r, c + 1, t) + b->getDataAtScaled(r, c - 1, t) ) / 4.0;
-      dys = ( t->getDataAt(r + 1, c) - t->getDataAt(r - 1, c) -
-              b->getDataAtScaled(r + 1, c, t) + b->getDataAtScaled(r - 1, c, t) ) / 4.0;
+      dxy = (m->getDataAtScaled(r + 1, c + 1, t) - m->getDataAtScaled(r + 1, c - 1, t) -
+             m->getDataAtScaled(r - 1, c + 1, t) + m->getDataAtScaled(r - 1, c - 1, t)) / 4.0;
+      dxs = (t->getDataAt(r, c + 1) - t->getDataAt(r, c - 1) -
+             b->getDataAtScaled(r, c + 1, t) + b->getDataAtScaled(r, c - 1, t)) / 4.0;
+      dys = (t->getDataAt(r + 1, c) - t->getDataAt(r - 1, c) -
+             b->getDataAtScaled(r + 1, c, t) + b->getDataAtScaled(r - 1, c, t)) / 4.0;
 
-      H = cvCreateMat( 3, 3, CV_64FC1 );
-      cvmSet( H, 0, 0, dxx );
-      cvmSet( H, 0, 1, dxy );
-      cvmSet( H, 0, 2, dxs );
-      cvmSet( H, 1, 0, dxy );
-      cvmSet( H, 1, 1, dyy );
-      cvmSet( H, 1, 2, dys );
-      cvmSet( H, 2, 0, dxs );
-      cvmSet( H, 2, 1, dys );
-      cvmSet( H, 2, 2, dss );
+      H = cvCreateMat(3, 3, CV_64FC1);
+      cvmSet(H, 0, 0, dxx);
+      cvmSet(H, 0, 1, dxy);
+      cvmSet(H, 0, 2, dxs);
+      cvmSet(H, 1, 0, dxy);
+      cvmSet(H, 1, 1, dyy);
+      cvmSet(H, 1, 2, dys);
+      cvmSet(H, 2, 0, dxs);
+      cvmSet(H, 2, 1, dys);
+      cvmSet(H, 2, 2, dss);
 
       return H;
     }
   }
-}
 
+}
