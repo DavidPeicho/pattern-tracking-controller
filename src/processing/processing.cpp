@@ -175,16 +175,12 @@ void
 integralImage(cv::Mat &output, cv::Mat& input) {
   grayscale(output, input);
   for (int y = 1; y < output.rows; ++y)
-    output.at<uchar>(y, 0) = output.at<uchar>(0, 0);
+    output.at<uchar>(y, 0) += output.at<uchar>(y - 1, 0);
   for (int x = 1; x < output.cols ; ++x)
-    output.at<uchar>(0, x) = output.at<uchar>(0, 0);
-  for (int y = 1; y < output.rows; ++y) {
-    for (int x = 1; x < output.cols; ++x) {
-      auto& px = output.at<cv::Vec3b>(y, x);
-      uint8_t value = output.at<uchar>(y - 1, x) + output.at<uchar>(y, x - 1);
-      output.at<uchar>(y, x) = value;
-    }
-  }
+    output.at<uchar>(0, x) += output.at<uchar>(0, x - 1);
+  for (int y = 1; y < output.rows; ++y)
+    for (int x = 1; x < output.cols; ++x)
+      output.at<uchar>(y, x) += output.at<uchar>(y - 1, x) + output.at<uchar>(y, x - 1);
 }
 
 }
