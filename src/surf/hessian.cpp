@@ -21,7 +21,6 @@ namespace ptc {
     void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep)
     {
-      std::vector<InterestPoint> featurePoints;
       ResponseMap rm(img, nbOctaves, intervalsPerOctave);
       rm.printResponseInfo();
       std::shared_ptr<ResponseLayer> b, m, t;
@@ -33,7 +32,7 @@ namespace ptc {
           for (int r = 0; r < b->data->size().height; r++)
             for (int c = 0; c < b->data->size().width; c++)
               if (isExtremum(r, c, b, m, t))
-                interpolateExtremum(r, c, b, m, t, featurePoints);
+                interpolateExtremum(r, c, b, m, t, iPoints);
         }
       }
     }
@@ -81,7 +80,7 @@ namespace ptc {
       interpolateStep(r, c, t, m, b, &xi, &xr, &xc );
 
       // If point is sufficiently close to the actual extremum
-      if( fabs( xi ) < 0.5f  &&  fabs( xr ) < 0.5f  &&  fabs( xc ) < 0.5f )
+      if( fabs(xi) < 0.5f  &&  fabs(xr) < 0.5f  &&  fabs(xc) < 0.5f )
       {
         InterestPoint ipt(
             static_cast<int>((c + xc) * t->getStep()),

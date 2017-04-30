@@ -25,8 +25,7 @@ int main() {
 
   std::vector<InterestPoint> featurePoints;
   ptc::surf::Hessian::hessian(frame, 4, 4, 2, featurePoints);
-  for (uint i = 0; i < featurePoints.size(); i++)
-    std::cout << featurePoints[i].getX() << " : " << featurePoints[i].getY() << std::endl;
+  std::cout << "Features points detected: " << featurePoints.size() << std::endl;
 
   auto outputPtr = tracker->processFrame(frame);
   cv::imwrite("result.png", *outputPtr);
