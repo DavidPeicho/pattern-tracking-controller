@@ -8,6 +8,7 @@
 #include <opencv2/core/matx.hpp>
 #include <opencv2/core/mat.hpp>
 #include <memory>
+#include "response-layer.hpp"
 
 namespace ptc {
 
@@ -21,6 +22,14 @@ namespace ptc {
       private:
       static void getInterestPoints(cv::Mat &img, std::vector<cv::Vec2i> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep);
+      static bool isExtremum(int r, int c,
+                             std::shared_ptr<ResponseLayer> b,
+                             std::shared_ptr<ResponseLayer> m,
+                             std::shared_ptr<ResponseLayer> t);
+      static void interpolateExtremum(int r, int c,
+                                      std::shared_ptr<ResponseLayer> b,
+                                      std::shared_ptr<ResponseLayer> m,
+                                      std::shared_ptr<ResponseLayer> t);
     };
 
   }

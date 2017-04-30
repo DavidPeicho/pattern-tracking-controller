@@ -26,7 +26,7 @@ namespace ptc {
           Dxx *= nFactor;
           Dyy *= nFactor;
           Dxy *= nFactor;
-          data->at<uchar>(r, c) = Dxx * Dyy - 0.81 * Dxy * Dxy;
+          data->at<uchar>(r, c) = (uint8_t)(Dxx * Dyy - 0.81 * Dxy * Dxy);
         }
     }
 
