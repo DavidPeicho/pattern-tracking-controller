@@ -9,6 +9,7 @@
 #include <opencv2/core/mat.hpp>
 #include <memory>
 #include "response-layer.hpp"
+#include "InterestPoint.hpp"
 
 namespace ptc {
 
@@ -17,10 +18,11 @@ namespace ptc {
     class Hessian {
       public:
       Hessian() = delete;
-      static std::vector<cv::Vec2i> hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep);
+      static void hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
+                          std::vector<InterestPoint> &featurePoints);
 
       private:
-      static void getInterestPoints(cv::Mat &img, std::vector<cv::Vec2i> &iPoints,
+      static void getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep);
       static bool isExtremum(int r, int c,
                              std::shared_ptr<ResponseLayer> b,
@@ -29,7 +31,17 @@ namespace ptc {
       static void interpolateExtremum(int r, int c,
                                       std::shared_ptr<ResponseLayer> b,
                                       std::shared_ptr<ResponseLayer> m,
-                                      std::shared_ptr<ResponseLayer> t);
+                                      std::shared_ptr<ResponseLayer> t,
+                                      std::vector<InterestPoint> &featurePoints);
+
+      static void interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+                                  std::shared_ptr<ResponseLayer> b, double *xi, double *xr, double *xc);
+
+      static CvMat *deriv3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+                            std::shared_ptr<ResponseLayer> b);
+
+      static CvMat *hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+                              std::shared_ptr<ResponseLayer> b);
     };
 
   }

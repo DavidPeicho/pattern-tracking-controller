@@ -23,9 +23,10 @@ int main() {
     return -1;
   }
 
-  auto ip = ptc::surf::Hessian::hessian(frame, 4, 4, 2);
-  for (auto e : ip) {
-    std::cout << e << std::endl;
+  std::vector<InterestPoint> featurePoints;
+  ptc::surf::Hessian::hessian(frame, 4, 4, 2, featurePoints);
+  for (auto e : featurePoints) {
+    std::cout << e.getX() << " : " << e.getY() << std::endl;
   }
 
   auto outputPtr = tracker->processFrame(frame);

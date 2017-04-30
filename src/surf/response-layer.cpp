@@ -27,6 +27,7 @@ namespace ptc {
           Dyy *= nFactor;
           Dxy *= nFactor;
           data->at<uchar>(r, c) = (uint8_t)(Dxx * Dyy - 0.81 * Dxy * Dxy);
+          laplacian->at<uchar>(r, c) = (uint8_t)(Dxx + Dyy >= 0 ? 1 : 0);
         }
     }
 

@@ -1,5 +1,5 @@
 set(PTC_SOURCES ptc.cpp ptc-impl.cpp
-        surf/response-layer.cpp)
+        surf/response-layer.cpp surf/InterestPoint.cpp surf/InterestPoint.hpp)
 
 find_package(OpenCV REQUIRED)
 
