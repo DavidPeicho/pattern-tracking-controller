@@ -36,6 +36,9 @@ downscaleBy(cv::Mat& output, cv::Mat& input, double factor);
 void
 integralImage(cv::Mat &output, cv::Mat& input);
 
+double
+getBoxIntegral(cv::Mat &data, int row, int col, int rows, int cols);
+
 }
 
 }

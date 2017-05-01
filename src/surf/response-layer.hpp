@@ -39,7 +39,6 @@ namespace ptc {
 
       private:
       void buildResponseLayer();
-      double getBoxIntegral(int row, int col, int rows, int cols);
 
       private:
       int _filterSize;

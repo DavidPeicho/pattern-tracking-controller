@@ -5,6 +5,7 @@
 #include <ptc.hpp>
 #include <unistd.h>
 #include <surf/hessian.hpp>
+#include <surf/surf.hpp>
 
 int main() {
 
@@ -23,9 +24,8 @@ int main() {
     return -1;
   }
 
-  std::vector<InterestPoint> featurePoints;
-  ptc::surf::Hessian::hessian(frame, 4, 4, 2, featurePoints);
-  std::cout << "Features points detected: " << featurePoints.size() << std::endl;
+  ptc::surf::Surf surf(frame);
+  surf.launch();
 
   auto outputPtr = tracker->processFrame(frame);
   cv::imwrite("result.png", *outputPtr);

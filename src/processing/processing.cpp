@@ -183,6 +183,20 @@ integralImage(cv::Mat &output, cv::Mat& input) {
       output.at<uchar>(y, x) += output.at<uchar>(y - 1, x) + output.at<uchar>(y, x - 1);
 }
 
+double
+getBoxIntegral(cv::Mat& data, int row, int col, int rows, int cols) {
+  float A = 0, B = 0, C = 0, D = 0;
+  int r1 = std::min(row, data.size().height - 1);
+  int c1 = std::min(row, data.size().width - 1);
+  int r2 = std::min(row + rows, data.size().height - 1);
+  int c2 = std::min(col + cols, data.size().width - 1);
+  if (r1 >= 0 && c1 >= 0) A = data.at<uchar>(r1, c1);
+  if (r1 >= 0 && c2 >= 0) B = data.at<uchar>(r1, c2);
+  if (r2 >= 0 && c1 >= 0) C = data.at<uchar>(r2, c1);
+  if (r2 >= 0 && c2 >= 0) D = data.at<uchar>(r2, c2);
+  return std::max(0.f, A - B - C + D);
+}
+
 }
 
 }
