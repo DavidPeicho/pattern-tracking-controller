@@ -5,7 +5,7 @@
 #pragma once 
 
 #include <opencv2/core/mat.hpp>
-#include "InterestPoint.hpp"
+#include "interest-point.hpp"
 
 namespace ptc {
 
@@ -28,7 +28,7 @@ namespace ptc {
 
       private:
       cv::Mat &_img;
-      std::vector<InterestPoint> _interestPoints;
+      std::vector<interest> _interestPoints;
 
     };
 

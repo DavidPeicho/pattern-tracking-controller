@@ -7,7 +7,7 @@
 #include <iostream>
 #include <processing/processing.hpp>
 #include "surf.hpp"
-#include "InterestPoint.hpp"
+#include "interest-point.hpp"
 #include "hessian.hpp"
 
 namespace ptc {

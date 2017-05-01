@@ -7,5 +7,5 @@ set(PTC_SOURCES ${PTC_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/response-map.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/response-layer.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/response-layer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/InterestPoint.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/interest-point.hpp
         PARENT_SCOPE)

@@ -9,7 +9,7 @@
 #include <opencv2/core/mat.hpp>
 #include <memory>
 #include "response-layer.hpp"
-#include "InterestPoint.hpp"
+#include "interest-point.hpp"
 
 namespace ptc {
 
@@ -19,10 +19,10 @@ namespace ptc {
       public:
       Hessian() = delete;
       static void hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
-                          std::vector<InterestPoint> &featurePoints);
+                          std::vector<interest> &featurePoints);
 
       private:
-      static void getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
+      static void getInterestPoints(cv::Mat &img, std::vector<interest> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep);
       static bool isExtremum(int r, int c,
                              std::shared_ptr<ResponseLayer> b,
@@ -32,7 +32,7 @@ namespace ptc {
                                       std::shared_ptr<ResponseLayer> b,
                                       std::shared_ptr<ResponseLayer> m,
                                       std::shared_ptr<ResponseLayer> t,
-                                      std::vector<InterestPoint> &featurePoints);
+                                      std::vector<interest> &featurePoints);
 
       static void interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                                   std::shared_ptr<ResponseLayer> b, double *xi, double *xr, double *xc);

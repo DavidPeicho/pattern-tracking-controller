@@ -10,9 +10,9 @@
 namespace ptc {
   namespace surf {
 
-    class InterestPoint {
+    class interest {
       public:
-      InterestPoint(int x, int y, float scale, int laplacian) : _x(x), _y(y), _scale(scale),
+      interest(int x, int y, float scale, int laplacian) : _x(x), _y(y), _scale(scale),
                                                                                _laplacian(laplacian) {}
 
       public:
