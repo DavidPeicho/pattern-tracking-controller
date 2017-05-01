@@ -7,6 +7,7 @@
 #include <ptc.hpp>
 #include <unistd.h>
 #include <surf/hessian.hpp>
+#include <surf/surf.hpp>
 
 int main() {
 

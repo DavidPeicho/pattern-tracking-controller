@@ -24,7 +24,6 @@ namespace ptc {
       Utils::drawFeaturePoints(_img, _interestPoints);
     }
 
-
     void Surf::computeOrientations() {
       for (auto &e : _interestPoints) {
         float gauss = 0.f;
