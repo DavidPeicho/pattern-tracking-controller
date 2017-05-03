@@ -19,10 +19,10 @@ namespace ptc {
       public:
       Hessian() = delete;
       static void hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
-                          std::vector<interest> &featurePoints);
+                          std::vector<InterestPoint> &featurePoints);
 
       private:
-      static void getInterestPoints(cv::Mat &img, std::vector<interest> &iPoints,
+      static void getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep);
       static bool isExtremum(int r, int c,
                              std::shared_ptr<ResponseLayer> b,
@@ -32,7 +32,7 @@ namespace ptc {
                                       std::shared_ptr<ResponseLayer> b,
                                       std::shared_ptr<ResponseLayer> m,
                                       std::shared_ptr<ResponseLayer> t,
-                                      std::vector<interest> &featurePoints);
+                                      std::vector<InterestPoint> &featurePoints);
 
       static void interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                                   std::shared_ptr<ResponseLayer> b, double *xi, double *xr, double *xc);

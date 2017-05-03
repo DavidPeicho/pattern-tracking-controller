@@ -1,5 +1,5 @@
 set(PTC_SOURCES ptc.cpp ptc-impl.cpp
-        )
+        surf/utils.cpp surf/utils.hpp)
 
 find_package(OpenCV REQUIRED)
 

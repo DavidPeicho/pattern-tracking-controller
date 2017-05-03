@@ -6,9 +6,11 @@
 #include <vector>
 #include <iostream>
 #include <processing/processing.hpp>
+#include <unistd.h>
 #include "surf.hpp"
 #include "interest-point.hpp"
 #include "hessian.hpp"
+#include "utils.hpp"
 
 namespace ptc {
 
@@ -93,6 +95,7 @@ namespace ptc {
       ptc::surf::Hessian::hessian(_img, 4, 4, 2, _interestPoints);
       std::cout << "Features points detected: " << _interestPoints.size() << std::endl;
       computeOrientations();
+      Utils::drawFeaturePoints(_img, _interestPoints);
     }
 
     float Surf::getAngle(float X, float Y)

@@ -12,13 +12,13 @@ namespace ptc {
   namespace surf {
 
     void Hessian::hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
-    std::vector<interest> &featurePoints) {
+    std::vector<InterestPoint> &featurePoints) {
       cv::Mat copy(img.size(), img.type());
       processing::integralImage(copy, img);
       getInterestPoints(img, featurePoints, nbOctaves, intervalsPerOctave, initSamplingStep);
     }
 
-    void Hessian::getInterestPoints(cv::Mat &img, std::vector<interest> &iPoints,
+    void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
                                     int nbOctaves, int intervalsPerOctave, int initSamplingStep)
     {
       ResponseMap rm(img, nbOctaves, intervalsPerOctave);
@@ -68,7 +68,7 @@ namespace ptc {
 
     //! Interpolate scale-space extrema to subpixel accuracy to form an image feature.
     void Hessian::interpolateExtremum(int r, int c, std::shared_ptr<ResponseLayer> b, std::shared_ptr<ResponseLayer> m,
-                                      std::shared_ptr<ResponseLayer> t, std::vector<interest> &featurePoints)
+                                      std::shared_ptr<ResponseLayer> t, std::vector<InterestPoint> &featurePoints)
     {
       // get the step distance between filters
       // check the middle filter is mid way between top and bottom
@@ -82,7 +82,7 @@ namespace ptc {
       // If point is sufficiently close to the actual extremum
       if( fabs(xi) < 0.5f  &&  fabs(xr) < 0.5f  &&  fabs(xc) < 0.5f )
       {
-        interest ipt(
+        InterestPoint ipt(
             static_cast<int>((c + xc) * t->getStep()),
             static_cast<int>((r + xr) * t->getStep()),
             static_cast<float>((0.1333f) * (m->getStep() + xi * filterStep)),

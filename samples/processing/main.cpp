@@ -27,8 +27,10 @@ int main() {
   ptc::surf::Surf surf(frame);
   surf.launch();
 
-  auto outputPtr = tracker->processFrame(frame);
-  cv::imwrite("result.png", *outputPtr);
+  // auto outputPtr = tracker->processFrame(frame);
+  cv::imwrite("result.png", frame);
+  char temp[120];
+  std::cout << ( getcwd(temp, 120) ? std::string( temp ) : std::string("") ) << std::endl;
 
   tracker->free();
 

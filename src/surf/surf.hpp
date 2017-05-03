@@ -28,7 +28,7 @@ namespace ptc {
 
       private:
       cv::Mat &_img;
-      std::vector<interest> _interestPoints;
+      std::vector<InterestPoint> _interestPoints;
 
     };
 
