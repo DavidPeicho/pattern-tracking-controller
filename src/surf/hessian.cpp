@@ -43,6 +43,7 @@ namespace ptc {
       if (candidate < thres)
         return 0;
 
+
       int btscale = b->data->size().width / t->data->size().width;
 
       for (int rr = -1; rr <= 1; ++rr)
