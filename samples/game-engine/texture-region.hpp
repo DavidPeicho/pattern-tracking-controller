@@ -12,13 +12,23 @@ namespace engine {
 class TextureRegion {
 
   public:
-    TextureRegion(std::shared_ptr<sf::Texture>& atlas, size_t nbFrames,
+    TextureRegion(sf::Texture& atlas, size_t nbFrames,
                   sf::IntRect rect);
   
+  public:
+    inline sf::Texture&
+    getTexture() { return atlas_; }
+
+    inline size_t
+    getNbFrames() { return nbFrames_; }
+
+    inline const sf::IntRect&
+    getInitialRect() { return rect_; }
+
   private:
-    std::shared_ptr<sf::Texture>&   atlas_;
-    sf::IntRect                     rect_;
-    size_t                          nbFrames_;
+    sf::Texture&  atlas_;
+    sf::IntRect         rect_;
+    size_t              nbFrames_;
 
 };
 

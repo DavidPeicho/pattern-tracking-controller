@@ -11,7 +11,7 @@ namespace engine {
 class HorizontalActor : public Actor {
 
   public:
-    HorizontalActor(sf::Vector2i pos, sf::Vector2i scale);
+    HorizontalActor(sf::Vector2f pos, sf::Vector2f scale);
 
   public:
     virtual void

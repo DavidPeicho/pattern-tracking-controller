@@ -4,7 +4,7 @@ namespace ptc {
 
 namespace engine {
 
-Actor::Actor(sf::Vector2i pos, sf::Vector2i scale)
+Actor::Actor(sf::Vector2f pos, sf::Vector2f scale)
       : position_{pos}
       , scale_{scale} { }
 

@@ -4,7 +4,12 @@
 #include <vector>
 #include <memory>
 
+#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/System/Vector2.hpp>
+
+#include "actor.hpp"
+#include "texture-region.hpp"
 
 namespace ptc {
 
@@ -12,7 +17,17 @@ namespace engine {
 
 class Renderable {
 
-  
+  public:
+    Renderable(TextureRegion& textureRegion, const Actor& actor);
+
+  public:
+    void
+    render(sf::RenderWindow& window);
+
+  private:
+    const Actor&          actor_;
+    TextureRegion&        textureRegion_;
+    sf::Sprite            sprite_;
 
 };
 
@@ -29,7 +44,7 @@ class Renderer {
 
   public:
     void
-    render();
+    render(sf::RenderWindow& window);
 
     void
     resize(size_t newWidth, size_t newHeight);

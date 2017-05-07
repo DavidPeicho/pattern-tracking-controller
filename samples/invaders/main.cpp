@@ -8,6 +8,7 @@
 
 #include "../game-engine/actor.hpp"
 #include "../game-engine/texture-region.hpp"
+#include "../game-engine/renderer.hpp"
 #include "horizontal-actor.hpp"
 
 using namespace ptc::engine;
@@ -16,8 +17,16 @@ typedef std::shared_ptr<TextureRegion>  TextureRegionPtr;
 
 int main() {
 
-  sf::RenderWindow window(sf::VideoMode(800, 640), "Invader", sf::Style::Close);
+  static size_t GAME_WIDTH = 800;
+  static size_t GAME_HEIGHT = 640;
+
+  sf::RenderWindow window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT),
+                          "Invader",
+                          sf::Style::Close);
   sf::Clock clock;
+
+  // Creates world renderer in charge of drawing every actor
+  Renderer renderer;
 
   // Loads the asset once, and creates TextureRegion for each actor.
   // This allows several actors to share the same TextureRegion, avoiding
@@ -33,18 +42,34 @@ int main() {
   // every textures required by the game.
   std::unordered_map<std::string, TextureRegionPtr> texturesPool;
   texturesPool["pizza"] =
-           std::make_shared<TextureRegion>(atlas, 3, sf::IntRect(0, 0, 32, 32));
+          std::make_shared<TextureRegion>(*atlas, 3, sf::IntRect(0, 0, 32, 32));
   texturesPool["cupcake"] =
-          std::make_shared<TextureRegion>(atlas, 2, sf::IntRect(0, 32, 32, 32));
+         std::make_shared<TextureRegion>(*atlas, 2, sf::IntRect(0, 32, 32, 32));
   texturesPool["donut"] =
-          std::make_shared<TextureRegion>(atlas, 2, sf::IntRect(0, 64, 32, 32));
+         std::make_shared<TextureRegion>(*atlas, 2, sf::IntRect(0, 64, 32, 32));
+
+  std::vector<std::shared_ptr<Actor>> actors;
 
   // Creates enemies
   std::vector<std::shared_ptr<ptc::engine::HorizontalActor>> enemies(55);
   for (size_t i = 0; i < 55; ++i) {
-    auto pos = sf::Vector2i();
-    auto scale = sf::Vector2i(1.0, 1.0);
-    auto actor = std::make_shared<ptc::engine::HorizontalActor>(pos, scale);
+    // Creates associated actor, dealing with game data
+    float startX = (float)(GAME_WIDTH / (5 - (i / 11))) - 64.0f;
+    float startY = GAME_HEIGHT / (5 - (i / 11)) - 32.0f;
+    auto pos = sf::Vector2f(startX + i * 64.0f, startY);
+    auto scale = sf::Vector2f(1.0, 1.0);
+    actors.push_back(std::make_shared<HorizontalActor>(pos, scale));
+    auto& actor = actors[actors.size() - 1];
+    // Creates associate renderable, used to display the actor
+    auto txtPtr = texturesPool["pizza"];
+    if (i >= 11 && i < 33) {
+      txtPtr = texturesPool["cupcake"];
+    } else if (i >= 33) {
+      txtPtr = texturesPool["donut"];
+    }
+    auto renderable = std::make_shared<Renderable>(*txtPtr, *actor);
+    renderer.enqueue(renderable);
+
   }
 
   while (window.isOpen())
@@ -62,6 +87,7 @@ int main() {
     // Updates world
     window.clear(sf::Color(22, 29, 35));
     // Renders world
+    renderer.render(window);
     window.display();
   }
 

@@ -4,7 +4,7 @@ namespace ptc {
 
 namespace engine {
 
-  TextureRegion::TextureRegion(std::shared_ptr<sf::Texture>& atlas,
+  TextureRegion::TextureRegion(sf::Texture& atlas,
                                size_t nbFrames, sf::IntRect rect)
                 : atlas_{atlas}
                 , nbFrames_{nbFrames_}

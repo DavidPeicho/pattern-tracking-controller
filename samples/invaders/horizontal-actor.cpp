@@ -4,7 +4,7 @@ namespace ptc {
 
 namespace engine {
 
-HorizontalActor::HorizontalActor(sf::Vector2i pos, sf::Vector2i scale)
+HorizontalActor::HorizontalActor(sf::Vector2f pos, sf::Vector2f scale)
                 : Actor(pos, scale) { }
 
 void
