@@ -5,30 +5,23 @@
 #include <processing/processing.hpp>
 #include "hessian.hpp"
 #include "response-map.hpp"
-#include "interest-point.hpp"
 
 
 namespace ptc {
   namespace surf {
 
-    void Hessian::hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
-    std::vector<InterestPoint> &featurePoints) {
-      cv::Mat copy(img.size(), img.type());
-      processing::integralImage(copy, img);
-      getInterestPoints(img, featurePoints, nbOctaves, intervalsPerOctave, initSamplingStep);
-    }
-
-    void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
-                                    int nbOctaves, int intervalsPerOctave, int initSamplingStep)
+    void Hessian::getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints)
     {
-      ResponseMap rm(img, nbOctaves, intervalsPerOctave);
+      cv::Mat copy(img.size(), img.type());
+      cv::integral(img, copy);
+      ResponseMap rm(copy, _nbOctaves, _intervalsPerOctave);
       rm.printResponseInfo();
       std::shared_ptr<ResponseLayer> b, m, t;
-      for (int i = 0; i < nbOctaves; i++) {
-        for (int j = 0; j + 2 < intervalsPerOctave; j++) {
-          b = rm.layers[i * intervalsPerOctave + j];
-          m = rm.layers[i * intervalsPerOctave + j + 1];
-          t = rm.layers[i * intervalsPerOctave + j + 2];
+      for (int i = 0; i < _nbOctaves; i++) {
+        for (int j = 0; j + 2 < _intervalsPerOctave; j++) {
+          b = rm.layers[i * _intervalsPerOctave + j];
+          m = rm.layers[i * _intervalsPerOctave + j + 1];
+          t = rm.layers[i * _intervalsPerOctave + j + 2];
           for (int r = 0; r < b->data->size().height; r++)
             for (int c = 0; c < b->data->size().width; c++)
               if (isExtremum(r, c, b, m, t))

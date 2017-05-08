@@ -16,6 +16,15 @@ namespace ptc {
 
   namespace surf {
 
+    void Surf::launch() {
+      Hessian hessian(4, 4, 2, 400);
+      hessian.getInterestPoints(_img, _interestPoints);
+      std::cout << "Features points detected: " << _interestPoints.size() << std::endl;
+      computeOrientations();
+      Utils::drawFeaturePoints(_img, _interestPoints);
+    }
+
+
     void Surf::computeOrientations() {
       for (auto &e : _interestPoints) {
         float gauss = 0.f;
@@ -89,13 +98,6 @@ namespace ptc {
     {
       return (float) (processing::getBoxIntegral(_img, row, column - s / 2, s / 2, s)
                       -1 * processing::getBoxIntegral(_img, row-s/2, column-s/2, s/2, s));
-    }
-
-    void Surf::launch() {
-      ptc::surf::Hessian::hessian(_img, 4, 4, 2, _interestPoints);
-      std::cout << "Features points detected: " << _interestPoints.size() << std::endl;
-      computeOrientations();
-      Utils::drawFeaturePoints(_img, _interestPoints);
     }
 
     float Surf::getAngle(float X, float Y)

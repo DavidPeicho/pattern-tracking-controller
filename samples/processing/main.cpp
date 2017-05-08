@@ -30,7 +30,7 @@ int main() {
   // auto outputPtr = tracker->processFrame(frame);
   cv::imwrite("result.png", frame);
   char temp[120];
-  std::cout << ( getcwd(temp, 120) ? std::string( temp ) : std::string("") ) << std::endl;
+  std::cout << "Results saved into " << ( getcwd(temp, 120) ? std::string( temp ) : std::string("") ) << std::endl;
 
   tracker->free();
 

@@ -17,31 +17,39 @@ namespace ptc {
 
     class Hessian {
       public:
-      Hessian() = delete;
-      static void hessian(cv::Mat &img, int nbOctaves, int intervalsPerOctave, int initSamplingStep,
-                          std::vector<InterestPoint> &featurePoints);
+      Hessian(int nbOctaves, int intervalsPerOctave, int initSamplingStep, int hessianThreshold) :
+          _nbOctaves(nbOctaves), _intervalsPerOctave(intervalsPerOctave), _initSamplinigStep(initSamplingStep),
+          _hessianThreshold(hessianThreshold) {}
+      void getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints);
+
 
       private:
-      static void getInterestPoints(cv::Mat &img, std::vector<InterestPoint> &iPoints,
-                                    int nbOctaves, int intervalsPerOctave, int initSamplingStep);
-      static bool isExtremum(int r, int c,
+      bool isExtremum(int r, int c,
                              std::shared_ptr<ResponseLayer> b,
                              std::shared_ptr<ResponseLayer> m,
                              std::shared_ptr<ResponseLayer> t);
-      static void interpolateExtremum(int r, int c,
+
+      void interpolateExtremum(int r, int c,
                                       std::shared_ptr<ResponseLayer> b,
                                       std::shared_ptr<ResponseLayer> m,
                                       std::shared_ptr<ResponseLayer> t,
                                       std::vector<InterestPoint> &featurePoints);
 
-      static void interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+      void interpolateStep(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                                   std::shared_ptr<ResponseLayer> b, double *xi, double *xr, double *xc);
 
-      static CvMat *deriv3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+      CvMat *deriv3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                             std::shared_ptr<ResponseLayer> b);
 
-      static CvMat *hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
+      CvMat *hessian3D(int r, int c, std::shared_ptr<ResponseLayer> t, std::shared_ptr<ResponseLayer> m,
                               std::shared_ptr<ResponseLayer> b);
+
+      private:
+      int _nbOctaves;
+      int _intervalsPerOctave;
+      int _initSamplinigStep;
+      int _hessianThreshold;
+
     };
 
   }
