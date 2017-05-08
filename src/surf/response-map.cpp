@@ -32,7 +32,7 @@ namespace ptc {
         h /= 2;
         step *= 2;
         for (duplicateIndex = previousSize - nbIntervals + 1; duplicateIndex < previousSize; duplicateIndex += 2) {
-          layers.push_back(layers[duplicateIndex]);
+          layers.push_back(std::make_shared<ResponseLayer>(layers[duplicateIndex]->getFilterSize(), w, h, step));
           added++;
         }
         for (added; added < nbIntervals; added++) {
