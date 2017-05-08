@@ -9,16 +9,28 @@
 #include "../game-engine/actor.hpp"
 #include "../game-engine/texture-region.hpp"
 #include "../game-engine/renderer.hpp"
+#include "../game-engine/command.hpp"
+
 #include "horizontal-actor.hpp"
+#include "move-command.hpp"
+#include "ia.hpp"
 
 using namespace ptc::engine;
-typedef std::shared_ptr<sf::Texture>    TexturePtr;
-typedef std::shared_ptr<TextureRegion>  TextureRegionPtr;
+using namespace ptc::invader;
+typedef std::shared_ptr<sf::Texture>                                TexturePtr;
+typedef std::shared_ptr<TextureRegion>                              TextureRegionPtr;
+typedef std::vector<std::shared_ptr<HorizontalActor>>               actorsList;
+
+static size_t GAME_WIDTH  = 800;
+static size_t GAME_HEIGHT = 640;
+static size_t MAX_ROW_NB  = 5;
+
+void
+buildEnemyRow(actorsList& actorsList, Renderer& renderer,
+              TextureRegionPtr& texture, size_t rowNbr);
+
 
 int main() {
-
-  static size_t GAME_WIDTH = 800;
-  static size_t GAME_HEIGHT = 640;
 
   sf::RenderWindow window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT),
                           "Invader",
@@ -37,6 +49,7 @@ int main() {
   if (!atlas->loadFromFile("samples/assets/invader-atlas.png")) {
     throw std::runtime_error("File: impossible to load invader-atlas.png");
   }
+  atlas->setSmooth(true);
 
   // Creates every texture region from the atlas containing
   // every textures required by the game.
@@ -51,26 +64,16 @@ int main() {
   std::vector<std::shared_ptr<Actor>> actors;
 
   // Creates enemies
-  std::vector<std::shared_ptr<ptc::engine::HorizontalActor>> enemies(55);
-  for (size_t i = 0; i < 55; ++i) {
-    // Creates associated actor, dealing with game data
-    float startX = (float)(GAME_WIDTH / (5 - (i / 11))) - 64.0f;
-    float startY = GAME_HEIGHT / (5 - (i / 11)) - 32.0f;
-    auto pos = sf::Vector2f(startX + i * 64.0f, startY);
-    auto scale = sf::Vector2f(1.0, 1.0);
-    actors.push_back(std::make_shared<HorizontalActor>(pos, scale));
-    auto& actor = actors[actors.size() - 1];
-    // Creates associate renderable, used to display the actor
-    auto txtPtr = texturesPool["pizza"];
-    if (i >= 11 && i < 33) {
-      txtPtr = texturesPool["cupcake"];
-    } else if (i >= 33) {
-      txtPtr = texturesPool["donut"];
-    }
-    auto renderable = std::make_shared<Renderable>(*txtPtr, *actor);
-    renderer.enqueue(renderable);
+  actorsList enemies;
+  buildEnemyRow(enemies, renderer, texturesPool["pizza"], 1);
+  buildEnemyRow(enemies, renderer, texturesPool["cupcake"], 2);
+  buildEnemyRow(enemies, renderer, texturesPool["cupcake"], 3);
+  buildEnemyRow(enemies, renderer, texturesPool["donut"], 4);
+  buildEnemyRow(enemies, renderer, texturesPool["donut"], 5);
 
-  }
+  int enemiesDir = 1;
+
+  IA ia(enemies);
 
   while (window.isOpen())
   {
@@ -85,8 +88,9 @@ int main() {
     }
 
     // Updates world
-    window.clear(sf::Color(22, 29, 35));
+    ia.update(delta.asSeconds());
     // Renders world
+    window.clear(sf::Color(22, 29, 35));
     renderer.render(window);
     window.display();
   }
@@ -94,5 +98,23 @@ int main() {
   //tracker->stop();
 
   return 0;
+
+}
+
+void
+buildEnemyRow(actorsList& actorsList, Renderer& renderer,
+              TextureRegionPtr& texture, size_t rowNbr) {
+
+  for (size_t i = 1; i <= 11; ++i) {
+    float startX = i * 48.0f + 56.0f + 32.0f;
+    float startY = rowNbr * 42.0f + 32.0f;
+    auto pos = sf::Vector2f(startX, startY);
+    auto scale = sf::Vector2f(1.0, 1.0);
+    actorsList.push_back(std::make_shared<HorizontalActor>(pos, scale));
+    auto& actor = actorsList[actorsList.size() - 1];
+    // Creates associate renderable, used to display the actor
+    auto renderable = std::make_shared<Renderable>(*texture, *actor);
+    renderer.enqueue(renderable);
+  }
 
 }

@@ -6,9 +6,9 @@
 
 namespace ptc {
 
-namespace engine {
+namespace invader {
 
-class HorizontalActor : public Actor {
+class HorizontalActor : public ptc::engine::Actor {
 
   public:
     HorizontalActor(sf::Vector2f pos, sf::Vector2f scale);

@@ -26,7 +26,7 @@ class Renderable {
 
   private:
     const Actor&          actor_;
-    TextureRegion&        textureRegion_;
+    const TextureRegion&  textureRegion_;
     sf::Sprite            sprite_;
 
 };
