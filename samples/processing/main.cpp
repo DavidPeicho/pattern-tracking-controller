@@ -20,20 +20,19 @@ int main() {
 
   while (true) {
 
-    tracker->update();
-    auto& tmp = tracker->getRawFrame();
-    tracker->preprocessFrame(tmp);
-    auto& gray = tracker->getFrame(ptc::data::Frame::GRAY);
-    auto& blur = tracker->getFrame(ptc::data::Frame::BLURRED);
-    auto& bin = tracker->getFrame(ptc::data::Frame::BINARIZED);
-    auto found = tracker->processFrame(bin);
+    auto found = tracker->update();
 
     if(cv::waitKey(20) >= 0) break;
 
+    auto& tmp = tracker->getRawFrame();
     if (!found) {
       cv::imshow("frame", tmp);
       continue;
     }
+
+    auto& gray = tracker->getFrame(ptc::data::Frame::GRAY);
+    auto& blur = tracker->getFrame(ptc::data::Frame::BLURRED);
+    auto& bin = tracker->getFrame(ptc::data::Frame::BINARIZED);
 
     int h = tmp.size().height;
     int w = tmp.size().width;

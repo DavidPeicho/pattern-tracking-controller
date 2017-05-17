@@ -31,8 +31,8 @@ class TrackerImpl {
     void
     start();
 
-    void
-    update();
+    bool
+    update(event::InputProcessor& inputProcessor);
 
     void
     stop();
@@ -52,6 +52,9 @@ class TrackerImpl {
 
     const std::vector<cv::Point>&
     arrowShape() const;
+
+    void
+    setDebugFrame(std::shared_ptr<cv::Mat>& frame);
 
   private:
     void
@@ -78,6 +81,8 @@ class TrackerImpl {
     bool*                                 cachedVisited_;
 
     cv::Mat                               rawFrame_;
+    std::shared_ptr<cv::Mat>              debugFrame_;
+
     std::vector<std::shared_ptr<cv::Mat>> frames_;
 
     std::vector<cv::Point>                arrowContour_;

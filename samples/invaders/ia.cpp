@@ -6,8 +6,10 @@ namespace invader {
 
 unsigned int IA::MAX_NB_MOVES = 12;
 
-IA::IA(const std::vector<std::shared_ptr<HorizontalActor>>& actors)
+IA::IA(const std::vector<std::shared_ptr<MovingActor>>& actors,
+       std::list<std::shared_ptr<BulletActor>>& bulletsList)
    : actors_{actors}
+   , bulletsList_{bulletsList}
    , leftCmd_{std::make_shared<MoveLeftCommand>()}
    , rightCmd_{std::make_shared<MoveRightCommand>()}
    , dir_{IA::Dir::RIGHT}
@@ -18,8 +20,6 @@ IA::update(float delta) {
 
   static float TIME_BEFORE_MV = 0.5f;
 
-  static float RIGHT_BOUND = 0.0f;
-
   if (elapsed_ >= TIME_BEFORE_MV) {
     IA::CmdPtr cmd = nullptr;
     if (dir_ == IA::Dir::RIGHT) {
@@ -29,7 +29,8 @@ IA::update(float delta) {
     }
     // Updates every enemies
     for (auto actor : actors_) {
-      cmd->execute(actor, delta);
+      actor->setDelta(delta);
+      cmd->execute(actor);
     }
     elapsed_ = 0.0f;
 

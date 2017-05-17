@@ -16,7 +16,7 @@ class Command {
 
   public:
     virtual void
-    execute(std::shared_ptr<Actor> actor, float delta) = 0;
+    execute(std::shared_ptr<Actor> actor) = 0;
 
 };
 

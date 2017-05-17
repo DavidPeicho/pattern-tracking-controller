@@ -10,7 +10,8 @@ double        TrackerImpl::MIN_EVT_DIST = 75.0;
 TrackerImpl::TrackerImpl()
             : h_{-1}, w_{-1}
             , scaleFactor_(0.0)
-            , cachedVisited_{nullptr} {
+            , cachedVisited_{nullptr}
+            , debugFrame_{nullptr} {
 
   arrowPoints_.reserve(3);
   arrowContour_.reserve(MAX_PTS_NB);
@@ -31,10 +32,19 @@ TrackerImpl::start() {
 
 }
 
-void
-TrackerImpl::update() {
+bool
+TrackerImpl::update(event::InputProcessor& inputProcessor) {
 
-  rawFrame_ = v_.nextFrame();
+  if (debugFrame_ == nullptr) {
+    rawFrame_ = v_.nextFrame();
+    preprocessFrame(rawFrame_);
+    auto bin = frames_[ptc::data::Frame::BINARIZED];
+    return processFrame(*bin, inputProcessor);
+  }
+
+  preprocessFrame(*debugFrame_);
+  auto bin = frames_[ptc::data::Frame::BINARIZED];
+  return processFrame(*bin, inputProcessor);
 
 }
 
@@ -84,8 +94,6 @@ TrackerImpl::preprocessFrame(const cv::Mat& input) {
     bin.at<uint8_t>(scaled.rows - 1, i) = 255;
   }
 
-  //cv::Canny(scaled, bin, 25, 150, 3);
-
 }
 
 bool
@@ -128,6 +136,13 @@ TrackerImpl::processFrame(const cv::Mat& input,
   }
 
   return false;
+
+}
+
+void
+TrackerImpl::setDebugFrame(std::shared_ptr<cv::Mat>& frame) {
+
+
 
 }
 

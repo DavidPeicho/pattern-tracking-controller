@@ -44,7 +44,7 @@ class Tracker {
     void
     start();
 
-    void
+    bool
     update();
 
     void
@@ -58,9 +58,12 @@ class Tracker {
 
   public:
     void
-    inputProcessor(event::InputProcessor i);
+    setDebugFrame(std::shared_ptr<cv::Mat>& frame);
 
   public:
+    void
+    inputProcessor(event::InputProcessor i);
+
     const cv::Mat&
     getRawFrame() const;
 

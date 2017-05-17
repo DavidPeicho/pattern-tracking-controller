@@ -12,12 +12,15 @@ class Actor {
     Actor(sf::Vector2f pos, sf::Vector2f scale);
 
   public:
-    virtual void update(float delta) = 0;
+    virtual void
+    update(float delta) = 0;
 
   public:
-    inline const sf::Vector2f& getPos() const { return position_; }
+    inline const sf::Vector2f&
+    getPos() const { return position_; }
 
-    inline const sf::Vector2f& getScale() const { return scale_; }
+    inline const sf::Vector2f&
+    getScale() const { return scale_; }
 
   protected:
     sf::Vector2f  position_;

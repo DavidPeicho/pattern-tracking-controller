@@ -21,10 +21,10 @@ Tracker::start() {
 
 }
 
-void
+bool
 Tracker::update() {
 
-  pimpl_->update();
+  return pimpl_->update(inputProcessor_);
 
 }
 
@@ -53,6 +53,13 @@ void
 Tracker::inputProcessor(event::InputProcessor i) {
 
   this->inputProcessor_ = i;
+
+}
+
+void
+Tracker::setDebugFrame(std::shared_ptr<cv::Mat>& frame) {
+
+  pimpl_->setDebugFrame(frame);
 
 }
 
