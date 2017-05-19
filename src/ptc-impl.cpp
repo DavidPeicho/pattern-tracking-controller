@@ -59,6 +59,8 @@ void
 TrackerImpl::preprocessFrame(const cv::Mat& input) {
 
   // TODO: Improve preprocessing by renforcing obtained contours.
+  // TODO: Use erode and distort.
+  // TODO:
 
   // Setups the memory once in order to reduce allocations
   if (h_ == -1 && w_ == -1) {
@@ -142,7 +144,7 @@ TrackerImpl::processFrame(const cv::Mat& input,
 void
 TrackerImpl::setDebugFrame(std::shared_ptr<cv::Mat>& frame) {
 
-
+  debugFrame_ = frame;
 
 }
 
@@ -203,18 +205,24 @@ TrackerImpl::computeEvents(event::InputProcessor& inputProcessor) {
   static auto leftBounds = std::make_tuple(120.0, 240.0);
   static auto downBounds = std::make_tuple(210.0, 330.0);
 
+  bool noAction = true;
   if (utils::maths::inBounds(angle, rightBounds)) {
     inputProcessor.call(event::Event::LEFT);
+    noAction = false;
+  } else if (utils::maths::inBounds(angle, leftBounds)) {
+    inputProcessor.call(event::Event::RIGHT);
+    noAction = false;
   }
+
   if (utils::maths::inBounds(angle, upBounds)) {
     inputProcessor.call(event::Event::UP);
-  }
-  if (utils::maths::inBounds(angle, leftBounds)) {
-    inputProcessor.call(event::Event::RIGHT);
-  }
-  if (utils::maths::inBounds(angle, downBounds)) {
+    noAction = false;
+  } else if (utils::maths::inBounds(angle, downBounds)) {
     inputProcessor.call(event::Event::DOWN);
+    noAction = false;
   }
+
+  if (noAction) inputProcessor.call(event::Event::NONE);
 
 }
 

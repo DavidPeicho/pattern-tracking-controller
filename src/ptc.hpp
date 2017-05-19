@@ -50,12 +50,6 @@ class Tracker {
     void
     stop();
 
-    void
-    preprocessFrame(const cv::Mat& input);
-
-    bool
-    processFrame(const cv::Mat& input);
-
   public:
     void
     setDebugFrame(std::shared_ptr<cv::Mat>& frame);
@@ -87,7 +81,5 @@ class Tracker {
     std::shared_ptr<TrackerImpl>  pimpl_;
 
 };
-
-Tracker* Tracker::instance_ = nullptr;
   
 } //

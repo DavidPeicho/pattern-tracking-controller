@@ -3,6 +3,8 @@
 
 namespace ptc {
 
+Tracker* Tracker::instance_ = nullptr;
+
 Tracker::~Tracker() {
 
 }
@@ -32,20 +34,6 @@ void
 Tracker::stop() {
 
   pimpl_->stop();
-
-}
-
-void
-Tracker::preprocessFrame(const cv::Mat& input) {
-
-  pimpl_->preprocessFrame(input);
-
-}
-
-bool
-Tracker::processFrame(const cv::Mat& input) {
-
-  return pimpl_->processFrame(input, inputProcessor_);
 
 }
 

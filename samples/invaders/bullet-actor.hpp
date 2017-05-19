@@ -11,7 +11,7 @@ namespace invader {
 class BulletActor : public ptc::invader::MovingActor {
 
   public:
-    BulletActor(sf::Vector2f pos, sf::Vector2f scale, sf::Vector2f dir);
+    BulletActor(sf::Vector2f pos, sf::Vector2f dir);
 
   public:
     void

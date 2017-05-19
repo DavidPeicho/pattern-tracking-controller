@@ -5,7 +5,13 @@ namespace ptc {
 namespace invader {
 
 MovingActor::MovingActor(sf::Vector2f pos, sf::Vector2f scale)
-                : ptc::engine::Actor(pos, scale) { }
+                : ptc::engine::Actor(pos, scale) {
+
+  boundingBox_.width = 32.0f;
+  boundingBox_.height = 32.0f;
+  updateBBox();
+
+}
 
 void
 MovingActor::update(float delta) { }
@@ -28,6 +34,7 @@ void
 MovingActor::moveDown() {
 
   position_.y += delta_ * moveSpeed_;
+  updateBBox();
 
 }
 
@@ -35,6 +42,7 @@ void
 MovingActor::moveRight() {
 
   position_.x += delta_ * moveSpeed_;
+  updateBBox();
 
 }
 
@@ -49,6 +57,14 @@ void
 MovingActor::setMoveSpeed(float s) {
 
   moveSpeed_ = s;
+
+}
+
+void
+MovingActor::updateBBox() {
+
+  boundingBox_.left = position_.x;
+  boundingBox_.top = position_.y;
 
 }
 

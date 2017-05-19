@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Rect.hpp>
 
 #include "../game-engine/actor.hpp"
 
@@ -37,9 +38,18 @@ class MovingActor : public ptc::engine::Actor {
     void
     setDelta(float d);
 
+    inline const sf::FloatRect&
+    getBBox() const { return boundingBox_; }
+
   private:
-    float moveSpeed_;
-    float delta_;
+    void
+    updateBBox();
+
+  protected:
+    sf::FloatRect boundingBox_;
+
+    float         moveSpeed_;
+    float         delta_;
 
 };
 

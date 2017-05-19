@@ -1,7 +1,8 @@
 #pragma once 
 
 #include <cstddef>
-#include <vector>
+#include <unordered_map>
+#include <list>
 #include <memory>
 
 #include <SFML/Graphics.hpp>
@@ -18,17 +19,29 @@ namespace engine {
 class Renderable {
 
   public:
-    Renderable(TextureRegion& textureRegion, const Actor& actor);
+    Renderable(TextureRegion& textureRegion,
+               std::shared_ptr<Actor> actor);
 
   public:
     void
     render(sf::RenderWindow& window);
 
-  private:
-    const Actor&          actor_;
-    const TextureRegion&  textureRegion_;
-    sf::Sprite            sprite_;
+  public:
+    std::shared_ptr<Actor>
+    getActor();
 
+    inline void
+    setVisible(bool v) { visible_ = v; }
+
+    inline bool
+    isVisible() { return visible_; }
+
+  private:
+    std::shared_ptr<Actor>  actor_;
+    const TextureRegion&    textureRegion_;
+    sf::Sprite              sprite_;
+
+    bool                    visible_ = true;
 };
 
 class Renderer {
@@ -51,13 +64,17 @@ class Renderer {
 
   public:
     void
-    enqueue(const std::shared_ptr<Renderable>& component);
+    enqueue(std::string listId, std::shared_ptr<Renderable>& component);
+
+    std::list<std::shared_ptr<Renderable>>&
+    getList(std::string listId);
     
   private:
     size_t                                    width_;
     size_t                                    height_;
 
-    std::vector<std::shared_ptr<Renderable>>  components_;
+    std::unordered_map<std::string,
+      std::list<std::shared_ptr<Renderable>>> components_;
 
 };
 

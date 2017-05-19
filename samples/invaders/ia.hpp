@@ -3,8 +3,14 @@
 #include <vector>
 #include <memory>
 #include <list>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+
 
 #include "../game-engine/command.hpp"
+#include "../game-engine/renderer.hpp"
+#include "../game-engine/texture-region.hpp"
 
 #include "moving-actor.hpp"
 #include "bullet-actor.hpp"
@@ -28,20 +34,25 @@ class IA {
     };
 
   public:
-    IA(const std::vector<std::shared_ptr<MovingActor>>& actors,
-       std::list<std::shared_ptr<BulletActor>>& bulletsList);
+    IA();
 
   public:
     void
-    update(float delta);
+    update(float delta,
+           const std::list<std::shared_ptr<ptc::engine::Renderable>>&,
+           std::list<std::shared_ptr<ptc::engine::Renderable>>&,
+           const std::shared_ptr<ptc::engine::TextureRegion>&);
+
+  private:
+    void
+    shot(const std::list<std::shared_ptr<ptc::engine::Renderable>>&,
+         std::list<std::shared_ptr<ptc::engine::Renderable>>&,
+         const std::shared_ptr<ptc::engine::TextureRegion>&);
 
   private:
     static unsigned int MAX_NB_MOVES;
 
   private:
-    const std::vector<std::shared_ptr<MovingActor>>&  actors_;
-    std::list<std::shared_ptr<BulletActor>>&          bulletsList_;
-    
     MoveLeftCmdPtr                                    leftCmd_;
     MoveRightCmdPtr                                   rightCmd_;
     
@@ -50,6 +61,7 @@ class IA {
     unsigned int                                      nbMoves_;
 
     float                                             elapsed_;
+    float                                             elapsedShot_;
 
 };
 

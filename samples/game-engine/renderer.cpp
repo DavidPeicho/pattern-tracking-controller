@@ -8,7 +8,7 @@ namespace engine {
   int Renderer::BASE_HEIGHT = 640;
 
   Renderable::Renderable(TextureRegion& textureRegion,
-                         const Actor& actor)
+                         std::shared_ptr<Actor> actor)
              : textureRegion_{textureRegion}
              , actor_{actor} {
 
@@ -20,11 +20,20 @@ namespace engine {
   void
   Renderable::render(sf::RenderWindow& window) {
 
-    sprite_.setPosition(actor_.getPos());
-    sprite_.setScale(actor_.getScale());
+    if (!visible_) return;
+
+    sprite_.setPosition(actor_->getPos());
+    sprite_.setScale(actor_->getScale());
     window.draw(sprite_);
 
   }
+
+std::shared_ptr<Actor>
+Renderable::getActor() {
+
+  return actor_;
+
+}
 
   Renderer::Renderer()
            : Renderer(BASE_WIDTH, BASE_HEIGHT) { }
@@ -36,7 +45,13 @@ namespace engine {
   void
   Renderer::render(sf::RenderWindow& window) {
 
-    for (const auto& component : components_) component->render(window);
+    for (const auto& tuple : components_) {
+      auto& list = tuple.second;
+      for (const auto& component : list) {
+        component->render(window);
+      }
+    }
+
 
   }
 
@@ -49,11 +64,21 @@ namespace engine {
   }
 
   void
-  Renderer::enqueue(const std::shared_ptr<Renderable>& component) {
+  Renderer::enqueue(std::string listId,
+                    std::shared_ptr<Renderable>& component) {
 
-    components_.push_back(component);
+    auto& list = components_[listId];
+    list.push_front(component);
 
   }
+
+std::list<std::shared_ptr<Renderable>>&
+Renderer::getList(std::string listId) {
+
+  return components_[listId];
+
+}
+
 
 } // namespace engine
 
