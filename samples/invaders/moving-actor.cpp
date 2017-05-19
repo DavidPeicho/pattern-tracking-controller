@@ -14,19 +14,24 @@ MovingActor::MovingActor(sf::Vector2f pos, sf::Vector2f scale)
 }
 
 void
-MovingActor::update(float delta) { }
+MovingActor::update(float delta) {
+
+  updateBBox();
+
+}
 
 void
 MovingActor::moveLeft() {
 
   position_.x -= delta_ * moveSpeed_;
-
+  updateBBox();
 }
 
 void
 MovingActor::moveUp() {
 
   position_.y -= delta_ * moveSpeed_;
+  updateBBox();
 
 }
 
@@ -47,6 +52,14 @@ MovingActor::moveRight() {
 }
 
 void
+MovingActor::updateBBox() {
+
+  boundingBox_.left = position_.x;
+  boundingBox_.top = position_.y;
+
+}
+
+void
 MovingActor::setDelta(float d) {
 
   delta_ = d;
@@ -57,14 +70,6 @@ void
 MovingActor::setMoveSpeed(float s) {
 
   moveSpeed_ = s;
-
-}
-
-void
-MovingActor::updateBBox() {
-
-  boundingBox_.left = position_.x;
-  boundingBox_.top = position_.y;
 
 }
 

@@ -31,6 +31,9 @@ class MovingActor : public ptc::engine::Actor {
     void
     moveDown();
 
+    void
+    updateBBox();
+
   public:
     void
     setMoveSpeed(float s);
@@ -41,9 +44,12 @@ class MovingActor : public ptc::engine::Actor {
     inline const sf::FloatRect&
     getBBox() const { return boundingBox_; }
 
-  private:
-    void
-    updateBBox();
+    inline void
+    setBBoxDim(float width, float height) {
+
+      boundingBox_.width = width;
+      boundingBox_.height = height;
+    }
 
   protected:
     sf::FloatRect boundingBox_;

@@ -19,6 +19,15 @@ class Actor {
     inline const sf::Vector2f&
     getPos() const { return position_; }
 
+    inline void
+    setPos(sf::Vector2f pos) { position_ = pos; }
+
+    inline void
+    setPos(float x, float y) {
+      position_.x = x;
+      position_.y = y;
+    }
+
     inline const sf::Vector2f&
     getScale() const { return scale_; }
 

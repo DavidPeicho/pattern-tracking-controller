@@ -8,7 +8,7 @@ size_t World::MAX_NB_FRAMES_NOINPUT = 10;
 size_t World::GAME_WIDTH = 800;
 size_t World::GAME_HEIGHT = 640;
 size_t World::PARTICLE_SIZE = 4;
-float World::ENEMY_SPEED = 500.0f;
+float World::ENEMY_SPEED = 16.0f;
 float World::PLAYER_SPEED = 190.0f;
 float World::BULLET_SPEED = 220.0f;
 float World::TIME_BETWEEN_SHOT = 0.7f;
@@ -37,7 +37,8 @@ World::World(sf::RenderWindow& window, const sf::Font& font)
   gameoverUI_.setFont(font);
   gameoverUI_.setString("GAMEOVER");
   gameoverUI_.setCharacterSize(48);
-  gameoverUI_.setPosition(GAME_WIDTH / 2 - 192, GAME_HEIGHT / 2);
+  gameoverUI_.setColor(sf::Color::Red);
+  gameoverUI_.setPosition((GAME_WIDTH / 2) - 132, (GAME_HEIGHT - 42) / 2);
 
   registerEvents();
 
@@ -68,10 +69,7 @@ World::update() {
   auto& bulletsList = renderer_.getList("bullet");
   auto& enemiesList = renderer_.getList("entities");
 
-  //deltaTime_ = clock_.getElapsedTime().asSeconds();
-  deltaTime_ = clock_.restart().asSeconds();
-
-  //std::cout << deltaTime_ << std::endl;
+  deltaTime_ = float(clock_.restart().asMilliseconds()) / 1000.0f;
 
   sf::Event event;
   while (window_.pollEvent(event))
@@ -79,8 +77,6 @@ World::update() {
     if (event.type == sf::Event::Closed)
       window_.close();
   }
-
-  ia_.update(deltaTime_, enemiesList, bulletsList, regionsPool_["bullet"]);
 
   // Updates bullet list
   std::list<std::shared_ptr<ptc::engine::Renderable>>::const_iterator it;
@@ -90,36 +86,54 @@ World::update() {
 
     // Enemy has been shot
     for (auto& enemy : enemiesList) {
+
       if (!enemy->isVisible()) continue;
 
       auto a = std::dynamic_pointer_cast<MovingActor>(enemy->getActor());
-      if (a->getBBox().contains(bullet->getPos())) {
+      if (bullet->isCreatedByPlayer() &&
+          a->getBBox().intersects(bullet->getBBox())) {
         enemy->setVisible(false);
-        bulletsList.erase(it++);
         collided = true;
 
         // Updates score
         score += 50;
         //scoreValueText.setString(std::to_string(score));
+        break;
       }
     }
-    if (collided) continue;
-
-    // Player has been shot
-    if (playerActor_->getBBox().contains(bullet->getPos())) {
-      gameover_ = true;
+    if (collided) {
       bulletsList.erase(it++);
-      break;
+      continue;
     }
 
     if (bullet->getPos().y < 0 || bullet->getPos().y > GAME_HEIGHT) {
       bulletsList.erase(it++);
+      continue;
     }
     bullet->update(deltaTime_);
+
+    // Player has been shot
+    if (!bullet->isCreatedByPlayer() &&
+        playerActor_->getBBox().intersects(bullet->getBBox())) {
+      gameover_ = true;
+      bulletsList.erase(it++);
+      break;
+    }
   }
 
   playerActor_->setDelta(deltaTime_);
-  Tracker::instance()->update();
+  ia_.update(deltaTime_, enemiesList, bulletsList, regionsPool_["bullet"]);
+  //Tracker::instance()->update();
+
+  // DEBUG
+  playerActor_->setPos(sf::Mouse::getPosition().x, playerActor_->getPos().y);
+  playerActor_->setMoveSpeed(1.0f);
+  playerActor_->moveRight();
+  if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+  {
+    processor_.call(ptc::event::UP);
+  }
+  // END DEBUG
 
   // Updates particle list
   std::list<sf::Vector2f>::iterator partIt;
@@ -147,6 +161,22 @@ World::draw() {
   }
   // Draws entities
   renderer_.render(window_);
+
+  // DEBUG
+  /*auto& bulletsList = renderer_.getList("bullet");
+  std::list<std::shared_ptr<ptc::engine::Renderable>>::const_iterator it;
+  uint8_t t = 0;
+  for (it = bulletsList.begin(); it != bulletsList.end(); ) {
+    auto p = std::dynamic_pointer_cast<MovingActor>((*it)->getActor());
+    sf::RectangleShape s;
+    s.setSize(sf::Vector2f(p->getBBox().width, p->getBBox().height));
+    s.setPosition(p->getBBox().left, p->getBBox().top);
+    s.setFillColor(sf::Color(t, t, t, 255));
+    window_.draw(s);
+    std::advance(it, 5);
+    t += 24;
+  }*/
+
   if (gameover_) window_.draw(gameoverUI_);
 
 }
@@ -236,17 +266,17 @@ World::registerEvents() {
   auto& renderer = renderer_;
   auto& pool = regionsPool_;
 
-  processor.registerEvent(ptc::event::Event::RIGHT, [&player]() -> void {
+  processor_.registerEvent(ptc::event::Event::RIGHT, [&player]() -> void {
 
     player->moveRight();
 
   });
-  processor.registerEvent(ptc::event::Event::LEFT, [&player]() -> void {
+  processor_.registerEvent(ptc::event::Event::LEFT, [&player]() -> void {
 
     player->moveLeft();
 
   });
-  processor.registerEvent(ptc::event::Event::UP, [&timeShot, &player,
+  processor_.registerEvent(ptc::event::Event::UP, [&timeShot, &player,
   &renderer, &pool]() ->
     void {
 
@@ -256,6 +286,8 @@ World::registerEvents() {
                             player->getPos().y - 16);
     auto bullet = std::make_shared<BulletActor>(pos, sf::Vector2f(0.0f, -1.0f));
     bullet->setMoveSpeed(World::BULLET_SPEED);
+    bullet->setBBoxDim(12.0f, 12.0f);
+    bullet->setCreatedByPlayer(true);
 
     auto renderable = std::make_shared<ptc::engine::Renderable>
       (*pool["bullet"], bullet);
@@ -265,7 +297,7 @@ World::registerEvents() {
 
   });
   auto tracker = ptc::Tracker::instance();
-  tracker->inputProcessor(processor);
+  tracker->inputProcessor(processor_);
 
 }
 

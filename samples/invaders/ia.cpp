@@ -10,7 +10,9 @@ IA::IA()
    : leftCmd_{std::make_shared<MoveLeftCommand>()}
    , rightCmd_{std::make_shared<MoveRightCommand>()}
    , dir_{IA::Dir::RIGHT}
-   , nbMoves_{IA::MAX_NB_MOVES - 1} { }
+   , nbMoves_{IA::MAX_NB_MOVES - 1}
+   , elapsed_{0.0f}
+   , elapsedShot_{0.0f} { }
 
 void
 IA::update(float delta,
@@ -18,9 +20,12 @@ IA::update(float delta,
            std::list<std::shared_ptr<ptc::engine::Renderable>>& bullets,
            const std::shared_ptr<ptc::engine::TextureRegion>& bulletTexture) {
 
-  if (delta <= 0) return;
+  elapsed_ += delta;
+  elapsedShot_ += delta;
 
-  static float TIME_BEFORE_MV = 0.5f;
+  if (delta <= 0.005f) return;
+
+  static float TIME_BEFORE_MV = 1.0f;
   static float TIME_BEFORE_SHOT = 3.0f;
 
   if (elapsed_ >= TIME_BEFORE_MV) {
@@ -34,7 +39,7 @@ IA::update(float delta,
     for (auto& actor : actors) {
       if (!actor->isVisible()) continue;
       auto a = std::dynamic_pointer_cast<MovingActor>(actor->getActor());
-      a->setDelta(delta);
+      a->setDelta(1.0f);
       cmd->execute(a);
     }
     elapsed_ = 0.0f;
@@ -57,9 +62,6 @@ IA::update(float delta,
     elapsedShot_ = 0.0f;
   }
 
-  elapsed_ += delta;
-  elapsedShot_ += delta;
-
 }
 
 void
@@ -79,6 +81,8 @@ IA::shot(const std::list<std::shared_ptr<ptc::engine::Renderable>>& actors,
     auto pos = sf::Vector2f(actor->getPos().x + 16, actor->getPos().y + 32);
     auto bullet = std::make_shared<BulletActor>(pos, sf::Vector2f(0.0f, 1.0f));
     bullet->setMoveSpeed(220.0f);
+    bullet->setBBoxDim(12.0f, 12.0f);
+    bullet->setCreatedByPlayer(false);
     auto renderable = std::make_shared<ptc::engine::Renderable>(*bulletTexture,
                                                    bullet);
     bullets.push_front(renderable);

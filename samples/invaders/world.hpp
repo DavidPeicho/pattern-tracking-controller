@@ -91,7 +91,7 @@ class World {
     sf::CircleShape particle_;
 
     // Inputs
-    ptc::event::InputProcessor processor;
+    ptc::event::InputProcessor processor_;
 
     // Game variables
     MovingActorPtr playerActor_;
@@ -101,6 +101,7 @@ class World {
 
     float timeBeforeShot_ = 0.0f;
     float deltaTime_ = 0.0f;
+    float lastRenderTime_ = 0.0f;
     bool  gameover_ = false;
 
     // Ui variables

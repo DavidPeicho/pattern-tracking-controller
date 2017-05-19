@@ -12,6 +12,7 @@ namespace invader {
   BulletActor::update(float delta) {
 
     position_ += dir_ * moveSpeed_ * delta;
+    updateBBox();
 
   }
 

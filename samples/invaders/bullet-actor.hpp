@@ -17,8 +17,15 @@ class BulletActor : public ptc::invader::MovingActor {
     void
     update(float delta) override;
 
+    inline bool
+    isCreatedByPlayer() { return createdByPlayer_; }
+
+    inline void
+    setCreatedByPlayer(bool value) { createdByPlayer_ = value; }
+
   private:
     sf::Vector2f dir_;
+    bool createdByPlayer_ = false;
 
 };
 
