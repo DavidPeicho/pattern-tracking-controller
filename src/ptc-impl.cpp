@@ -5,7 +5,6 @@ namespace ptc {
 int           TrackerImpl::MIN_SIZE = 300;
 unsigned int  TrackerImpl::MAX_PTS_NB = 12;
 double        TrackerImpl::MIN_SCALE_FACTOR = 2.0;
-double        TrackerImpl::MIN_EVT_DIST = 75.0;
 
 TrackerImpl::TrackerImpl()
             : h_{-1}, w_{-1}
@@ -30,10 +29,16 @@ TrackerImpl::start() {
   utils::Logger::instance()->enable(true);
   v_.open();
 
+  // Setups the memory once in order to reduce allocations
+  if (h_ == -1 && w_ == -1) {
+    this->init(v_.getHeight(), v_.getWidth());
+  }
+
 }
 
 bool
-TrackerImpl::update(event::InputProcessor& inputProcessor) {
+TrackerImpl::update(const std::shared_ptr<event::InputProcessor>&
+                    inputProcessor) {
 
   if (debugFrame_ == nullptr) {
     rawFrame_ = v_.nextFrame();
@@ -61,11 +66,6 @@ TrackerImpl::preprocessFrame(const cv::Mat& input) {
   // TODO: Improve preprocessing by renforcing obtained contours.
   // TODO: Use erode and distort.
   // TODO:
-
-  // Setups the memory once in order to reduce allocations
-  if (h_ == -1 && w_ == -1) {
-    this->init(input.size().height, input.size().width);
-  }
 
   auto& gray = *frames_[data::Frame::GRAY];
   auto& blurred = *frames_[data::Frame::BLURRED];
@@ -100,7 +100,8 @@ TrackerImpl::preprocessFrame(const cv::Mat& input) {
 
 bool
 TrackerImpl::processFrame(const cv::Mat& input,
-                          event::InputProcessor& inputProcessor) {
+                          const std::shared_ptr<event::InputProcessor>&
+                          inputProcessor) {
 
   arrowPoints_.clear();
   arrowContour_.clear();
@@ -124,9 +125,9 @@ TrackerImpl::processFrame(const cv::Mat& input,
       if (processing::detection::isArrow(contoursPoly[i], arrowPoints_)) {
 
         // Saves contour in the container exposed by the API
-        std::copy(contoursPoly[i].begin(),
+        /*std::copy(contoursPoly[i].begin(),
                   contoursPoly[i].end(),
-                  std::back_inserter(arrowContour_));
+                  std::back_inserter(arrowContour_));*/
 
         computeEvents(inputProcessor);
         return true;
@@ -138,6 +139,24 @@ TrackerImpl::processFrame(const cv::Mat& input,
   }
 
   return false;
+
+}
+
+int
+TrackerImpl::getWidth() const {
+
+  if (w_ != - 1) return w_;
+
+  return v_.getWidth();
+
+}
+
+int
+TrackerImpl::getHeight() const {
+
+  if (h_ != -1) return h_;
+
+  return v_.getHeight();
 
 }
 
@@ -170,17 +189,19 @@ TrackerImpl::arrowShape() const {
 }
 
 void
-TrackerImpl::computeEvents(event::InputProcessor& inputProcessor) {
+TrackerImpl::computeEvents(const std::shared_ptr<event::InputProcessor>&
+                           inputProcessor) {
 
   // Checks if arrow matches a given shape
-  if (inputProcessor.isRegistered(event::Event::AT)) {
-    auto& shape = inputProcessor.getArrowShape();
+  if (inputProcessor->isRegistered(event::Event::AT)) {
+    auto& shape = inputProcessor->getTemplate();
     if (shape.size() == arrowPoints_.size()) {
-      if (utils::maths::inRange(shape[1], arrowPoints_[0], MIN_EVT_DIST) &&
-          utils::maths::inRange(shape[0], arrowPoints_[2], MIN_EVT_DIST) &&
-          utils::maths::inRange(shape[2], arrowPoints_[1], MIN_EVT_DIST)) {
+      double minDist = inputProcessor->getMinMatchDistance();
+      if (utils::maths::inRange(shape[1], arrowPoints_[0], minDist) &&
+          utils::maths::inRange(shape[0], arrowPoints_[2], minDist) &&
+          utils::maths::inRange(shape[2], arrowPoints_[1], minDist)) {
 
-        inputProcessor.call(event::Event::AT);
+        inputProcessor->call(event::Event::AT);
 
       }
     }
@@ -196,7 +217,6 @@ TrackerImpl::computeEvents(event::InputProcessor& inputProcessor) {
   dir.x = dir.x / norm;
   dir.y = - dir.y / norm;
 
-  //double angle = (atan2(dir.y, dir.x) * 180.0) / M_PI;
   double angle = (acos(dir.x) * 180.0) / M_PI;
   if (dir.y < 0.0) angle = 360.0 - angle;
 
@@ -207,22 +227,25 @@ TrackerImpl::computeEvents(event::InputProcessor& inputProcessor) {
 
   bool noAction = true;
   if (utils::maths::inBounds(angle, rightBounds)) {
-    inputProcessor.call(event::Event::LEFT);
+    inputProcessor->call(event::Event::LEFT);
     noAction = false;
   } else if (utils::maths::inBounds(angle, leftBounds)) {
-    inputProcessor.call(event::Event::RIGHT);
+    inputProcessor->call(event::Event::RIGHT);
     noAction = false;
   }
 
   if (utils::maths::inBounds(angle, upBounds)) {
-    inputProcessor.call(event::Event::UP);
+    inputProcessor->call(event::Event::UP);
     noAction = false;
   } else if (utils::maths::inBounds(angle, downBounds)) {
-    inputProcessor.call(event::Event::DOWN);
+    inputProcessor->call(event::Event::DOWN);
     noAction = false;
   }
 
-  if (noAction) inputProcessor.call(event::Event::NONE);
+  inputProcessor->setArrowShape(arrowPoints_);
+  inputProcessor->setAngle(angle);
+
+  if (noAction) inputProcessor->call(event::Event::NONE);
 
 }
 

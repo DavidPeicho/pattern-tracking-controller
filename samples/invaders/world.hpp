@@ -35,16 +35,31 @@ class World {
     typedef std::vector<MovingActorPtr> actorsList;
 
   private:
+    enum State {
+      MENU,
+      GAME,
+      GAME_STARTING
+    };
+
+  private:
     // Game constants
     static size_t MAX_NB_FRAMES_NOINPUT;
     static size_t GAME_WIDTH;
     static size_t GAME_HEIGHT;
     static size_t PARTICLE_SIZE;
+    static float INIT_ARROW_SIDE_LEN;
     static float ENEMY_SPEED;
     static float PLAYER_SPEED;
     static float BULLET_SPEED;
     static float TIME_BETWEEN_SHOT;
+    static float TIME_BEFORE_RESET_ARROW;
+    static float TIME_TEMPLATE_DETECTION;
+    static int TIME_BEFORE_START;
     static float PARTICLE_SPEED;
+
+    static size_t TEXT_SIZE_COUNTER;
+    static size_t TEXT_SIZE_SCORE;
+
     static sf::Vector2f PLAYER_INIT;
 
   public:
@@ -56,6 +71,25 @@ class World {
 
     void
     draw();
+
+  private:
+    void
+    updateMenu();
+
+    void
+    updateGameStarting();
+
+    void
+    updateGame();
+
+    void
+    drawMenu();
+
+    void
+    drawGameStarting();
+
+    void
+    drawGame();
 
   private:
     void
@@ -85,13 +119,27 @@ class World {
     sf::RenderWindow& window_;
 
     // UI
-    sf::Text gameoverUI_;
+    sf::Sprite  fixedArrowSprite_;
+    sf::Sprite  arrowSprite_;
+    sf::Text    scoreText_;
+    sf::Text    variableText_;
+    sf::Text    gameoverUI_;
+
+    sf::Color   redColor_;
+    sf::Color   lightGrayColor_;
+
+    sf::Clock   timerArrowOutArea_;
+    sf::Clock   timerBeforeStart_;
+    float       timerArrowInArea_;
 
     // Rendering
     sf::CircleShape particle_;
 
     // Inputs
-    ptc::event::InputProcessor processor_;
+    std::shared_ptr<ptc::event::InputProcessor> processor_;
+
+    // States
+    State state_;
 
     // Game variables
     MovingActorPtr playerActor_;

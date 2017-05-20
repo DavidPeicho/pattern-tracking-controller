@@ -56,13 +56,19 @@ class Tracker {
 
   public:
     void
-    inputProcessor(event::InputProcessor i);
+    inputProcessor(std::shared_ptr<event::InputProcessor> i);
 
     const cv::Mat&
     getRawFrame() const;
 
     const cv::Mat&
     getFrame(data::Frame frameType) const;
+
+    int
+    getWidth() const;
+
+    int
+    getHeight() const;
 
     const std::vector<cv::Point>&
     arrowShape() const;
@@ -76,9 +82,9 @@ class Tracker {
     static Tracker* instance_;
 
   private:
-    event::InputProcessor         inputProcessor_;
+    std::shared_ptr<event::InputProcessor>  inputProcessor_;
 
-    std::shared_ptr<TrackerImpl>  pimpl_;
+    std::shared_ptr<TrackerImpl>            pimpl_;
 
 };
   

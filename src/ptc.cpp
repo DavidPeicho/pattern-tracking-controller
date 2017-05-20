@@ -10,6 +10,7 @@ Tracker::~Tracker() {
 }
 
 Tracker::Tracker()
+        : inputProcessor_{nullptr}
 {
 
   pimpl_ = std::make_shared<TrackerImpl>();
@@ -26,6 +27,8 @@ Tracker::start() {
 bool
 Tracker::update() {
 
+  if (inputProcessor_ == nullptr) return false;
+
   return pimpl_->update(inputProcessor_);
 
 }
@@ -38,7 +41,7 @@ Tracker::stop() {
 }
 
 void
-Tracker::inputProcessor(event::InputProcessor i) {
+Tracker::inputProcessor(std::shared_ptr<event::InputProcessor> i) {
 
   this->inputProcessor_ = i;
 
@@ -62,6 +65,20 @@ const cv::Mat&
 Tracker::getFrame(data::Frame frameType) const {
 
   return pimpl_->getFrame(frameType);
+
+}
+
+int
+Tracker::getWidth() const {
+
+  return pimpl_->getWidth();
+
+}
+
+int
+Tracker::getHeight() const {
+
+  return pimpl_->getHeight();
 
 }
 

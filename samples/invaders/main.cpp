@@ -29,18 +29,6 @@ main() {
     throw std::runtime_error("File: impossible to load pixeldub.ttf");
   }
 
-  // UI text
-  sf::Text scoreText;
-  scoreText.setFont(font);
-  scoreText.setString("Score: ");
-  scoreText.setCharacterSize(24);
-  scoreText.setPosition(4, 4);
-  sf::Text scoreValueText;
-  scoreValueText.setString("0");
-  scoreValueText.setFont(font);
-  scoreValueText.setCharacterSize(24);
-  scoreValueText.setPosition(16, 32);
-
   ptc::invader::World world(window, font);
 
   // Registers inputs moving the player arround.
@@ -52,9 +40,6 @@ main() {
     // World rendering
     window.clear(sf::Color(22, 29, 35));
     world.draw();
-
-    window.draw(scoreText);
-    window.draw(scoreValueText);
     window.display();
   }
 

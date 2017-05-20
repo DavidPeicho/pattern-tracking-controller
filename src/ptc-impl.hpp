@@ -32,7 +32,7 @@ class TrackerImpl {
     start();
 
     bool
-    update(event::InputProcessor& inputProcessor);
+    update(const std::shared_ptr<event::InputProcessor>& inputProcessor);
 
     void
     stop();
@@ -41,7 +41,8 @@ class TrackerImpl {
     preprocessFrame(const cv::Mat& input);
 
     bool
-    processFrame(const cv::Mat& input, event::InputProcessor& inputProcessor);
+    processFrame(const cv::Mat& input, const
+                 std::shared_ptr<event::InputProcessor>& inputProcessor);
 
   public:
     const cv::Mat&
@@ -53,12 +54,18 @@ class TrackerImpl {
     const std::vector<cv::Point>&
     arrowShape() const;
 
+    int
+    getWidth() const;
+
+    int
+    getHeight() const;
+
     void
     setDebugFrame(std::shared_ptr<cv::Mat>& frame);
 
   private:
     void
-    computeEvents(event::InputProcessor& inputProcessor);
+    computeEvents(const std::shared_ptr<event::InputProcessor>& inputProcessor);
 
   private:
     void
@@ -68,7 +75,6 @@ class TrackerImpl {
     static int          MIN_SIZE;
     static unsigned int MAX_PTS_NB;
     static double       MIN_SCALE_FACTOR;
-    static double       MIN_EVT_DIST;
 
   private:
     VideoReader                           v_;

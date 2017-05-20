@@ -36,24 +36,41 @@ class InputProcessor {
     unregisterEvent(Event e);
 
   public:
-    void
-    setArrowShape(const std::vector<cv::Point>& points);
-
-  public:
     bool
     isRegistered(Event e);
 
-    inline std::vector<cv::Point>&
-    getArrowShape() {
+    inline void
+    setTemplate(std::vector<cv::Point> points) { template_ = points; }
 
-      return arrowShape_;
+    inline const std::vector<cv::Point>&
+    getTemplate() { return template_; }
 
-    }
+    void
+    setArrowShape(const std::vector<cv::Point>& points);
+
+    inline const std::vector<cv::Point>&
+    getArrowShape() const { return arrowShape_; }
+
+    inline void
+    setAngle(double a) { angle_ = a; }
+
+    inline double
+    getAngle() { return angle_; }
+
+    inline void
+    setMinMatchDistance(float minDist) { minMatchDist_ = minDist; }
+
+    inline float
+    getMinMatchDistance() { return minMatchDist_; }
 
   private:
     std::unordered_map<uint, std::vector<std::function<void()>>>  events_;
 
     std::vector<cv::Point>                                        arrowShape_;
+    std::vector<cv::Point>                                        template_;
+
+    double                                                        angle_;
+    float                                                         minMatchDist_;
 
 };
 

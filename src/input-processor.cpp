@@ -4,7 +4,8 @@ namespace ptc {
 
 namespace event {
 
-InputProcessor::InputProcessor() { }
+InputProcessor::InputProcessor()
+              : minMatchDist_{75.0} { }
 
 void
 InputProcessor::registerEvent(Event e, std::function<void()> callback) {
