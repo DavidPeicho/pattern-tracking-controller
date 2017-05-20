@@ -51,14 +51,22 @@ class World {
     static float ENEMY_SPEED;
     static float PLAYER_SPEED;
     static float BULLET_SPEED;
+
     static float TIME_BETWEEN_SHOT;
     static float TIME_BEFORE_RESET_ARROW;
     static float TIME_TEMPLATE_DETECTION;
-    static int TIME_BEFORE_START;
+    static float TIME_SCALE_TITLE_ANIM;
+
     static float PARTICLE_SPEED;
+
+    static int TIME_BEFORE_START;
+    static int TIME_BEFORE_RESET;
 
     static size_t TEXT_SIZE_COUNTER;
     static size_t TEXT_SIZE_SCORE;
+    static size_t TEXT_SIZE_GAMEOVER;
+
+    static size_t NB_ENEMIES;
 
     static sf::Vector2f PLAYER_INIT;
 
@@ -83,6 +91,9 @@ class World {
     updateGame();
 
     void
+    updateParticles();
+
+    void
     drawMenu();
 
     void
@@ -91,7 +102,28 @@ class World {
     void
     drawGame();
 
+    void
+    drawParticles();
+
   private:
+    void
+    setupMenu();
+
+    void
+    setupGameStarting();
+
+    void
+    setupGameover();
+
+    void
+    setupWin();
+
+    void
+    setupGame();
+
+    void
+    changeState(State s);
+
     void
     buildEnemiesColumn(size_t col);
 
@@ -107,6 +139,9 @@ class World {
     void
     registerEvents();
 
+    void
+    loadTexture(const char* name, const char* path);
+
   private:
     ptc::engine::Renderer renderer_;
 
@@ -118,7 +153,8 @@ class World {
     sf::Clock clock_;
     sf::RenderWindow& window_;
 
-    // UI
+    // UI Elements
+    sf::Sprite  titleSprite_;
     sf::Sprite  fixedArrowSprite_;
     sf::Sprite  arrowSprite_;
     sf::Text    scoreText_;
@@ -127,10 +163,16 @@ class World {
 
     sf::Color   redColor_;
     sf::Color   lightGrayColor_;
+    sf::Color   greenColor_;
 
+    // Timers
+    sf::Clock   timerScaleTitle_;
     sf::Clock   timerArrowOutArea_;
     sf::Clock   timerBeforeStart_;
+    sf::Clock   timerBeforeReset_;
+
     float       timerArrowInArea_;
+    bool        titleScaleUp_;
 
     // Rendering
     sf::CircleShape particle_;
@@ -142,15 +184,15 @@ class World {
     State state_;
 
     // Game variables
-    MovingActorPtr playerActor_;
-    IA ia_;
+    MovingActorPtr  playerActor_;
+    IA              ia_;
 
     std::list<sf::Vector2f> particleList_;
 
     float timeBeforeShot_ = 0.0f;
     float deltaTime_ = 0.0f;
-    float lastRenderTime_ = 0.0f;
     bool  gameover_ = false;
+    size_t nbEnemies_;
 
     // Ui variables
     int score = 0;

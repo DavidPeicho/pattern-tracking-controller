@@ -31,8 +31,6 @@ main() {
 
   ptc::invader::World world(window, font);
 
-  // Registers inputs moving the player arround.
-
   while (window.isOpen())
   {
     // World update
