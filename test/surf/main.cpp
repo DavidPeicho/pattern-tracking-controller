@@ -7,20 +7,12 @@
 #include <processing/processing.hpp>
 #include "opencv2/xfeatures2d.hpp"
 
-void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput);
+bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches);
 
 int main() {
   auto tracker = ptc::Tracker::instance();
-  cv::Mat testInput;
   cv::Mat arrowUpInput;
-  const char* testImgPath = "assets/test_input4.jpg";
   const char* arrowUpImgPath = "assets/bhl.jpg";
-
-  testInput = cv::imread(testImgPath, CV_LOAD_IMAGE_GRAYSCALE);
-  if(!testInput.data) {
-    std::cerr <<  "Could not open or find the test image" << std::endl ;
-    return -1;
-  }
 
   arrowUpInput= cv::imread(arrowUpImgPath, CV_LOAD_IMAGE_GRAYSCALE);
   if(!arrowUpInput.data) {
@@ -28,23 +20,33 @@ int main() {
     return -1;
   }
 
-  surfProcessImage(testInput, arrowUpInput);
+  cv::Mat img_matches;
 
-  char temp[120];
-  std::cout << "Results saved into " << (getcwd(temp, 120) ? std::string( temp ) : std::string("")) << std::endl;
+  tracker->start();
+
+  while (true) {
+
+    tracker->update();
+    auto& tmp = tracker->getRawFrame();
+    tracker->preprocessFrame(tmp);
+    auto& bin = tracker->getFrame(ptc::data::Frame::GRAY);
+
+    if(!cv::waitKey(20)) break;
+
+    if (!surfProcessImage(bin, arrowUpInput, img_matches)) {
+      cv::imshow("frame", tmp);
+      continue;
+    }
+
+    cv::imshow("frame", img_matches);
+  }
 
   tracker->free();
 
   return 0;
 }
 
-void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput) {
-  cv::Mat testFrame(testInput.size(), testInput.type());
-  cv::medianBlur(testInput, testInput, 7);
-  cv::adaptiveThreshold(testInput, testFrame, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 5, 2);
-  cv::Mat arrowUpFrame(arrowUpInput.size(), arrowUpInput.type());
-  cv::medianBlur(arrowUpInput, arrowUpInput, 7);
-  cv::adaptiveThreshold(arrowUpInput, arrowUpFrame, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY_INV, 5, 2);
+bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches) {
 
   int minHessian(500);
 
@@ -68,7 +70,6 @@ void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput) {
   cv::FlannBasedMatcher matcher;
   std::vector<cv::DMatch> matches;
   matcher.match(descriptorArrowUp, descriptorTest, matches);
-  cv::Mat img_matches;
 
   double max_dist = 0, min_dist = 100, dist = 0;
   //-- Quick calculation of max and min distances between keypoints
@@ -80,15 +81,16 @@ void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput) {
       max_dist = dist;
   }
 
-  printf("-- Max dist : %f \n", max_dist );
-  printf("-- Min dist : %f \n", min_dist );
-
   //-- Draw only "good" matches (i.e. whose distance is less than 3*min_dist )
   std::vector<cv::DMatch> good_matches;
 
   for (int i = 0; i < descriptorArrowUp.rows; i++)
-    if (matches[i].distance < 5 * min_dist)
+    if (matches[i].distance < 3 * min_dist)
       good_matches.push_back( matches[i]);
+
+
+  img_matches.data = NULL;
+
 
   cv::drawMatches(arrowUpFrame, keypointsArrowUp, testFrame, keypointsTest,
                   good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
@@ -112,19 +114,24 @@ void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput) {
 
   cv::perspectiveTransform(obj_corners, scene_corners, H);
 
-  // Get the rotation of the image
-  double a = H.at<double>(0, 0), b = H.at<double>(0, 1);
-  float r = cv::fastAtan2(b, a);
-  std::cout << "Rotation: " << r << std::endl;
-  if (r > 315 || r <= 45)
-    std::cout << "UP" << std::endl;
-  if (r >  45 && r <= 135)
-    std::cout << "RIGHT" << std::endl;
-  if (r > 135 && r <= 225)
-    std::cout << "DOWN" << std::endl;
-  if (r > 225 && r <= 315)
-    std::cout << "LEFT" << std::endl;
+  float good_matches_ratio = (float)good_matches.size() / (float)matches.size();
 
+  std::cout << good_matches_ratio << " ";
+  if (good_matches_ratio > 0.25) {
+    // Get the rotation of the image
+    double a = H.at<double>(0, 0), b = H.at<double>(0, 1);
+    float r = cv::fastAtan2(b, a);
+    if (r > 315 || r <= 45)
+      std::cout << "UP" << std::endl;
+    if (r > 45 && r <= 135)
+      std::cout << "RIGHT" << std::endl;
+    if (r > 135 && r <= 225)
+      std::cout << "DOWN" << std::endl;
+    if (r > 225 && r <= 315)
+      std::cout << "LEFT" << std::endl;
+  }
+  else
+    std::cout << std::endl;
 
   //-- Draw lines between the corners (the mapped object in the scene - image_2 )
   line(img_matches, scene_corners[0] + cv::Point2f(arrowUpFrame.cols, 0),
@@ -137,7 +144,5 @@ void surfProcessImage(cv::Mat &testInput, cv::Mat &arrowUpInput) {
        scene_corners[0] + cv::Point2f(arrowUpFrame.cols, 0), cv::Scalar( 0, 255, 0), 4);
 
   //-- Show detected matches
-  if (img_matches.data == NULL)
-    std::cerr << "Data of img_matches is null" << std::endl;
-  cv::imwrite("test_output_cv3.png", img_matches);
+  return img_matches.data != NULL;
 }
