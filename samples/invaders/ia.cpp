@@ -12,7 +12,8 @@ IA::IA()
    , dir_{IA::Dir::RIGHT}
    , nbMoves_{IA::MAX_NB_MOVES - 1}
    , elapsed_{0.0f}
-   , elapsedShot_{0.0f} { }
+   , elapsedShot_{0.0f}
+   , playedAnim_{false} { }
 
 void
 IA::update(float delta,
@@ -20,13 +21,23 @@ IA::update(float delta,
            std::list<std::shared_ptr<ptc::engine::Renderable>>& bullets,
            const std::shared_ptr<ptc::engine::TextureRegion>& bulletTexture) {
 
+  static float TIME_BEFORE_MV = 1.0f;
+  static float TIME_BEFORE_SHOT = 1.85f;
+
   elapsed_ += delta;
   elapsedShot_ += delta;
 
   if (delta <= 0.005f) return;
 
-  static float TIME_BEFORE_MV = 1.0f;
-  static float TIME_BEFORE_SHOT = 3.0f;
+  // Plays the move animation
+  if (!playedAnim_ && elapsed_ >= TIME_BEFORE_MV / 2) {
+    int frame = 1;
+    if (dir_ == IA::Dir::RIGHT) frame = 2;
+    for (auto& actor : actors) {
+      actor->setFrame(frame);
+    }
+    playedAnim_ = true;
+  }
 
   if (elapsed_ >= TIME_BEFORE_MV) {
     IA::CmdPtr cmd = nullptr;
@@ -41,8 +52,13 @@ IA::update(float delta,
       auto a = std::dynamic_pointer_cast<MovingActor>(actor->getActor());
       a->setDelta(1.0f);
       cmd->execute(a);
+
+      // Resets animation state
+      actor->setFrame(0);
     }
     elapsed_ = 0.0f;
+    playedAnim_ = false;
+
 
     // Changes direction whevener the enemies have
     // reached the other side.

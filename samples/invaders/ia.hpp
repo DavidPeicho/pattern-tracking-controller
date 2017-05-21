@@ -53,15 +53,17 @@ class IA {
     static unsigned int MAX_NB_MOVES;
 
   private:
-    MoveLeftCmdPtr                                    leftCmd_;
-    MoveRightCmdPtr                                   rightCmd_;
-    
-    Dir                                               dir_;
+    MoveLeftCmdPtr  leftCmd_;
+    MoveRightCmdPtr rightCmd_;
 
-    unsigned int                                      nbMoves_;
+    Dir             dir_;
 
-    float                                             elapsed_;
-    float                                             elapsedShot_;
+    unsigned int    nbMoves_;
+
+    float           elapsed_;
+    float           elapsedShot_;
+
+    bool            playedAnim_;
 
 };
 

@@ -30,6 +30,9 @@ class Renderable {
     std::shared_ptr<Actor>
     getActor();
 
+    void
+    setFrame(int i);
+
     inline void
     setVisible(bool v) { visible_ = v; }
 

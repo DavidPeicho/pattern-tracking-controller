@@ -43,7 +43,6 @@ class World {
 
   private:
     // Game constants
-    static size_t MAX_NB_FRAMES_NOINPUT;
     static size_t GAME_WIDTH;
     static size_t GAME_HEIGHT;
     static size_t PARTICLE_SIZE;
@@ -55,6 +54,7 @@ class World {
     static float TIME_BETWEEN_SHOT;
     static float TIME_BEFORE_RESET_ARROW;
     static float TIME_TEMPLATE_DETECTION;
+    static float TIME_PLAYER_ANIM;
     static float TIME_SCALE_TITLE_ANIM;
 
     static float PARTICLE_SPEED;
@@ -169,7 +169,7 @@ class World {
     sf::Clock   timerScaleTitle_;
     sf::Clock   timerArrowOutArea_;
     sf::Clock   timerBeforeStart_;
-    sf::Clock   timerBeforeReset_;
+    sf::Clock   timerPlayerAnimation_;
 
     float       timerArrowInArea_;
     bool        titleScaleUp_;
@@ -192,6 +192,7 @@ class World {
     float timeBeforeShot_ = 0.0f;
     float deltaTime_ = 0.0f;
     bool  gameover_ = false;
+
     size_t nbEnemies_;
 
     // Ui variables

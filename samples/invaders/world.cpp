@@ -4,7 +4,6 @@ namespace ptc {
 
 namespace invader {
 
-size_t World::MAX_NB_FRAMES_NOINPUT = 10;
 size_t World::GAME_WIDTH = 800;
 size_t World::GAME_HEIGHT = 640;
 size_t World::PARTICLE_SIZE = 4;
@@ -12,9 +11,10 @@ float World::INIT_ARROW_SIDE_LEN = 4666.0f;
 float World::ENEMY_SPEED = 16.0f;
 float World::PLAYER_SPEED = 190.0f;
 float World::BULLET_SPEED = 220.0f;
-float World::TIME_BETWEEN_SHOT = 0.7f;
+float World::TIME_BETWEEN_SHOT = 0.8f;
 float World::TIME_BEFORE_RESET_ARROW = 0.45f;
 float World::TIME_TEMPLATE_DETECTION = 2.0f;
+float World::TIME_PLAYER_ANIM = 0.5f;
 float World::TIME_SCALE_TITLE_ANIM = 1.5f;
 
 float World::PARTICLE_SPEED = 68.0f;
@@ -23,7 +23,7 @@ size_t World::TEXT_SIZE_COUNTER = 64;
 size_t World::TEXT_SIZE_GAMEOVER = 48;
 size_t World::TEXT_SIZE_SCORE = 24;
 
-size_t World::NB_ENEMIES = 1;
+size_t World::NB_ENEMIES = 55;
 
 int World::TIME_BEFORE_START = 3;
 int World::TIME_BEFORE_RESET = 5;
@@ -275,7 +275,14 @@ World::updateGame() {
   }
 
   playerActor_->setDelta(deltaTime_);
+  // Resets player initial frame
+  if (timerPlayerAnimation_.getElapsedTime().asSeconds() >= TIME_PLAYER_ANIM) {
+    auto& renderable = renderer_.getList("player").front();
+    renderable->setFrame(0);
+  }
+
   ia_.update(deltaTime_, enemiesList, bulletsList, regionsPool_["bullet"]);
+
   Tracker::instance()->update();
 
   timeBeforeShot_ += deltaTime_;
@@ -413,11 +420,13 @@ World::setupWin() {
   gameoverUI_.setPosition(halfWidth, (GAME_HEIGHT / 4) - halfSize);
 
   scoreText_.setCharacterSize(TEXT_SIZE_GAMEOVER);
-  scoreText_.setPosition(halfWidth, (GAME_HEIGHT / 2) - 24.0f);
+  scoreText_.setString("SCORE: ");
+  scoreText_.setPosition((GAME_WIDTH / 2) - (halfSize * 7) / 2,
+                         (GAME_HEIGHT / 2) - halfSize);
 
   variableText_.setCharacterSize(TEXT_SIZE_GAMEOVER);
   variableText_.setPosition(halfWidth + 10 * halfSize,
-                            (GAME_HEIGHT / 2) - 24.0f);
+                            (GAME_HEIGHT / 2) - halfSize);
 
   timerBeforeStart_.restart();
 
@@ -539,6 +548,7 @@ World::registerEvents() {
 
   auto& player = playerActor_;
   auto& timeShot = timeBeforeShot_;
+  auto& timerPlayerAnim = timerPlayerAnimation_;
   auto& renderer = renderer_;
   auto& pool = regionsPool_;
 
@@ -554,7 +564,7 @@ World::registerEvents() {
 
   });
   processor_->registerEvent(ptc::event::Event::UP, [&timeShot, &player,
-  &renderer, &pool]() ->
+  &renderer, &pool, &timerPlayerAnim]() ->
     void {
 
     if (timeShot < World::TIME_BETWEEN_SHOT) return;
@@ -571,6 +581,11 @@ World::registerEvents() {
 
     renderer.enqueue("bullet", renderable);
     timeShot = 0.0f;
+
+    auto& playerRenderable = renderer.getList("player").front();
+    playerRenderable->setFrame(1);
+
+    timerPlayerAnim.restart();
 
   });
 

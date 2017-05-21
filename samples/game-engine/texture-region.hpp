@@ -23,12 +23,13 @@ class TextureRegion {
     getNbFrames() { return nbFrames_; }
 
     inline const sf::IntRect&
-    getInitialRect() { return rect_; }
+    getInitialRect() const { return rect_; }
+
 
   private:
     sf::Texture&  atlas_;
-    sf::IntRect         rect_;
-    size_t              nbFrames_;
+    sf::IntRect   rect_;
+    size_t        nbFrames_;
 
 };
 
