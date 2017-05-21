@@ -10,4 +10,6 @@ set(PTC_SOURCES ${PTC_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/interest-point.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/geometry.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/geometry.hpp
         PARENT_SCOPE)

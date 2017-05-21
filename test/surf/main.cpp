@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <processing/processing.hpp>
+#include <surf/geometry.hpp>
 #include "opencv2/xfeatures2d.hpp"
 
 bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches);
@@ -110,9 +111,13 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   obj_corners[1] = cvPoint(arrowUpFrame.cols, 0);
   obj_corners[2] = cvPoint(arrowUpFrame.cols, arrowUpFrame.rows);
   obj_corners[3] = cvPoint(0, arrowUpFrame.rows);
-  std::vector<cv::Point2f> scene_corners(4);
+  std::vector<cv::Point2f> scene_corners;
 
-  cv::perspectiveTransform(obj_corners, scene_corners, H);
+  //cv::perspectiveTransform(obj_corners, scene_corners, H);
+  ptc::surf::Geometry::perspectiveTransform(obj_corners, scene_corners, H);
+  for (auto& e : scene_corners) {
+    std::cout << e.x << " " << e.y << std::endl;
+  }
 
   float good_matches_ratio = (float)good_matches.size() / (float)matches.size();
 
