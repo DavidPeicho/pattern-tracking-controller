@@ -9,42 +9,12 @@
 #include "opencv2/xfeatures2d.hpp"
 
 bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches);
+int videoTest();
+int imageTest();
 
 int main() {
-  auto tracker = ptc::Tracker::instance();
-  cv::Mat arrowUpInput;
-  const char* arrowUpImgPath = "assets/bhl.jpg";
-
-  arrowUpInput= cv::imread(arrowUpImgPath, CV_LOAD_IMAGE_GRAYSCALE);
-  if(!arrowUpInput.data) {
-    std::cerr <<  "Could not open or find the object image" << std::endl ;
-    return -1;
-  }
-
-  cv::Mat img_matches;
-
-  tracker->start();
-
-  while (true) {
-
-    tracker->update();
-    auto& tmp = tracker->getRawFrame();
-    tracker->preprocessFrame(tmp);
-    auto& bin = tracker->getFrame(ptc::data::Frame::GRAY);
-
-    if(!cv::waitKey(20)) break;
-
-    if (!surfProcessImage(bin, arrowUpInput, img_matches)) {
-      cv::imshow("frame", tmp);
-      continue;
-    }
-
-    cv::imshow("frame", img_matches);
-  }
-
-  tracker->free();
-
-  return 0;
+  //return videoTest();
+  return imageTest();
 }
 
 bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches) {
@@ -150,4 +120,65 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
 
   //-- Show detected matches
   return img_matches.data != NULL;
+}
+
+int videoTest() {
+  auto tracker = ptc::Tracker::instance();
+  cv::Mat arrowUpInput;
+  const char* arrowUpImgPath = "assets/bhl.jpg";
+
+  arrowUpInput= cv::imread(arrowUpImgPath, CV_LOAD_IMAGE_GRAYSCALE);
+  if(!arrowUpInput.data) {
+    std::cerr <<  "Could not open or find the object image" << std::endl ;
+    return -1;
+  }
+
+  cv::Mat img_matches;
+
+  tracker->start();
+
+  while (true) {
+
+    tracker->update();
+    auto& tmp = tracker->getRawFrame();
+    tracker->preprocessFrame(tmp);
+    auto& bin = tracker->getFrame(ptc::data::Frame::GRAY);
+
+    if(!cv::waitKey(20)) break;
+
+    if (!surfProcessImage(bin, arrowUpInput, img_matches)) {
+      cv::imshow("frame", tmp);
+      continue;
+    }
+
+    cv::imshow("frame", img_matches);
+  }
+
+  tracker->free();
+  return 0;
+}
+
+int imageTest() {
+  const char* arrowUpImgPath = "assets/bhl.jpg";
+  cv::Mat arrowUpInput = cv::imread(arrowUpImgPath, CV_LOAD_IMAGE_GRAYSCALE);
+  if(!arrowUpInput.data) {
+    std::cerr <<  "Could not open or find the object image" << std::endl ;
+    return -1;
+  }
+  const char* testImagePath = "assets/test_input3.jpg";
+  cv::Mat testInput = cv::imread(testImagePath, CV_LOAD_IMAGE_GRAYSCALE);
+  if(!testInput.data) {
+    std::cerr <<  "Could not open or find the test image" << std::endl ;
+    return -1;
+  }
+  cv::Mat img_matches;
+
+  if (!surfProcessImage(testInput, arrowUpInput, img_matches)) {
+    cv::imwrite("test_output.jpg", testInput);
+    return 1;
+  }
+
+  cv::imwrite("test_output.jpg", img_matches);
+
+  return 0;
 }
