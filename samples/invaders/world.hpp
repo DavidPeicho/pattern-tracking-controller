@@ -46,6 +46,7 @@ class World {
     static size_t GAME_WIDTH;
     static size_t GAME_HEIGHT;
     static size_t PARTICLE_SIZE;
+
     static float INIT_ARROW_SIDE_LEN;
     static float ENEMY_SPEED;
     static float PLAYER_SPEED;
@@ -56,6 +57,8 @@ class World {
     static float TIME_TEMPLATE_DETECTION;
     static float TIME_PLAYER_ANIM;
     static float TIME_SCALE_TITLE_ANIM;
+    static float TIME_SHIELD_ACTIVATION;
+    static float TIME_NEXT_SHIELD_ACTIVATION;
 
     static float PARTICLE_SPEED;
 
@@ -67,6 +70,7 @@ class World {
     static size_t TEXT_SIZE_GAMEOVER;
 
     static size_t NB_ENEMIES;
+    static size_t NB_SHIELDS;
 
     static sf::Vector2f PLAYER_INIT;
 
@@ -158,6 +162,7 @@ class World {
     sf::Sprite  fixedArrowSprite_;
     sf::Sprite  arrowSprite_;
     sf::Text    scoreText_;
+    sf::Text    shieldsText_;
     sf::Text    variableText_;
     sf::Text    gameoverUI_;
 
@@ -170,6 +175,8 @@ class World {
     sf::Clock   timerArrowOutArea_;
     sf::Clock   timerBeforeStart_;
     sf::Clock   timerPlayerAnimation_;
+    sf::Clock   timerShieldActivation_;
+    sf::Clock   timerNextShield_;
 
     float       timerArrowInArea_;
     bool        titleScaleUp_;
@@ -185,6 +192,7 @@ class World {
 
     // Game variables
     MovingActorPtr  playerActor_;
+    MovingActorPtr  shieldActor_;
     IA              ia_;
 
     std::list<sf::Vector2f> particleList_;
@@ -194,6 +202,7 @@ class World {
     bool  gameover_ = false;
 
     size_t nbEnemies_;
+    size_t nbShields_;
 
     // Ui variables
     int score = 0;

@@ -49,6 +49,7 @@ class MovingActor : public ptc::engine::Actor {
 
       boundingBox_.width = width;
       boundingBox_.height = height;
+
     }
 
   protected:

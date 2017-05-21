@@ -48,7 +48,6 @@ IA::update(float delta,
     }
     // Updates every enemies
     for (auto& actor : actors) {
-      if (!actor->isVisible()) continue;
       auto a = std::dynamic_pointer_cast<MovingActor>(actor->getActor());
       a->setDelta(1.0f);
       cmd->execute(a);

@@ -27,14 +27,14 @@ class Renderable {
     render(sf::RenderWindow& window);
 
   public:
-    std::shared_ptr<Actor>
-    getActor();
-
     void
     setFrame(int i);
 
     inline void
     setVisible(bool v) { visible_ = v; }
+
+    std::shared_ptr<Actor>
+    getActor();
 
     inline bool
     isVisible() { return visible_; }

@@ -11,11 +11,14 @@ float World::INIT_ARROW_SIDE_LEN = 4666.0f;
 float World::ENEMY_SPEED = 16.0f;
 float World::PLAYER_SPEED = 190.0f;
 float World::BULLET_SPEED = 220.0f;
-float World::TIME_BETWEEN_SHOT = 0.8f;
+
+float World::TIME_BETWEEN_SHOT = 1.15f;
 float World::TIME_BEFORE_RESET_ARROW = 0.45f;
 float World::TIME_TEMPLATE_DETECTION = 2.0f;
 float World::TIME_PLAYER_ANIM = 0.5f;
 float World::TIME_SCALE_TITLE_ANIM = 1.5f;
+float World::TIME_SHIELD_ACTIVATION = 4.5f;
+float World::TIME_NEXT_SHIELD_ACTIVATION = 1.0f;
 
 float World::PARTICLE_SPEED = 68.0f;
 
@@ -24,6 +27,7 @@ size_t World::TEXT_SIZE_GAMEOVER = 48;
 size_t World::TEXT_SIZE_SCORE = 24;
 
 size_t World::NB_ENEMIES = 55;
+size_t World::NB_SHIELDS = 3;
 
 int World::TIME_BEFORE_START = 3;
 int World::TIME_BEFORE_RESET = 5;
@@ -33,6 +37,8 @@ sf::Vector2f World::PLAYER_INIT = sf::Vector2f(0.0f, GAME_HEIGHT - 64.0f);
 World::World(sf::RenderWindow& window, const sf::Font& font)
       : playerActor_{std::make_shared<MovingActor>(World::PLAYER_INIT,
                                                    sf::Vector2f(1.0, 1.0))}
+      , shieldActor_{std::make_shared<MovingActor>(World::PLAYER_INIT,
+                                                     sf::Vector2f(1.0, 1.0))}
       , window_{window}
       , particle_{sf::CircleShape(2)}
       , state_{World::State::MENU}
@@ -42,6 +48,7 @@ World::World(sf::RenderWindow& window, const sf::Font& font)
       , titleScaleUp_{false}
       , greenColor_{sf::Color(46, 204, 113)}
       , nbEnemies_{NB_ENEMIES}
+      , nbShields_{NB_SHIELDS}
 {
 
   // Loads the asset once, and creates TextureRegion for each actor.
@@ -60,6 +67,8 @@ World::World(sf::RenderWindow& window, const sf::Font& font)
 
   scoreText_.setFont(font);
 
+  shieldsText_.setFont(font);
+
   variableText_.setString("0");
   variableText_.setFont(font);
 
@@ -74,6 +83,12 @@ World::World(sf::RenderWindow& window, const sf::Font& font)
   auto playerRenderable = std::make_shared<ptc::engine::Renderable>
     (*regionsPool_["tomatoe"], playerActor_);
   renderer_.enqueue("player", playerRenderable);
+
+  auto& shieldTex = *texturesPool_["shield"];
+  shieldActor_->setBBoxDim(shieldTex.getSize().x, shieldTex.getSize().y);
+  auto shieldRenderable = std::make_shared<ptc::engine::Renderable>
+    (*regionsPool_["shield"], shieldActor_);
+  renderer_.enqueue("shield", shieldRenderable);
 
   // Init particle system
   size_t nbParticles = GAME_HEIGHT / (World::PARTICLE_SIZE + 8);
@@ -208,6 +223,7 @@ World::updateGame() {
 
   auto& bulletsList = renderer_.getList("bullet");
   auto& enemiesList = renderer_.getList("entities");
+  auto& shieldRenderable = renderer_.getList("shield").front();
 
   deltaTime_ = float(clock_.restart().asMilliseconds()) / 1000.0f;
 
@@ -234,7 +250,7 @@ World::updateGame() {
 
       auto a = std::dynamic_pointer_cast<MovingActor>(enemy->getActor());
       if (bullet->isCreatedByPlayer() &&
-          a->getBBox().intersects(bullet->getBBox())) {
+        a->getBBox().intersects(bullet->getBBox())) {
         enemy->setVisible(false);
         collided = true;
 
@@ -263,15 +279,20 @@ World::updateGame() {
     }
     bullet->update(deltaTime_);
 
-    // Player has been shot
-    if (!bullet->isCreatedByPlayer() &&
-        playerActor_->getBBox().intersects(bullet->getBBox())) {
-
-      bulletsList.erase(it++);
-
-      setupGameover();
-      break;
+    if (!bullet->isCreatedByPlayer()) {
+      if (shieldRenderable->isVisible() &&
+          shieldActor_->getBBox().intersects(bullet->getBBox())) {
+        shieldRenderable->setVisible(false);
+        bulletsList.erase(it++);
+        --nbShields_;
+        shieldsText_.setString("Shields: " + std::to_string(nbShields_));
+      } else if (playerActor_->getBBox().intersects(bullet->getBBox())) {
+        setupGameover();
+        bulletsList.erase(it++);
+        return;
+      }
     }
+
   }
 
   playerActor_->setDelta(deltaTime_);
@@ -284,6 +305,17 @@ World::updateGame() {
   ia_.update(deltaTime_, enemiesList, bulletsList, regionsPool_["bullet"]);
 
   Tracker::instance()->update();
+
+  int shieldWidth = texturesPool_["shield"]->getSize().x;
+  shieldActor_->setPos(playerActor_->getPos().x - (shieldWidth) / 2 + 16.0f,
+                       playerActor_->getPos().y - 16.0f);
+  shieldActor_->update(deltaTime_);
+  if (shieldRenderable->isVisible() &&
+      timerShieldActivation_.getElapsedTime().asSeconds() >= TIME_SHIELD_ACTIVATION) {
+    shieldRenderable->setVisible(false);
+    --nbShields_;
+    shieldsText_.setString("Shields: " + std::to_string(nbShields_));
+  }
 
   timeBeforeShot_ += deltaTime_;
 
@@ -337,6 +369,7 @@ World::drawGame() {
   // Draws UI
   window_.draw(scoreText_);
   window_.draw(variableText_);
+  window_.draw(shieldsText_);
 
   if (gameover_) window_.draw(gameoverUI_);
 
@@ -447,8 +480,12 @@ World::setupGame() {
 
   bulletsList.clear();
 
+  auto& shieldRenderable = renderer_.getList("shield").front();
+  shieldRenderable->setVisible(false);
+
   gameover_ = false;
   score = 0;
+  nbShields_ = NB_SHIELDS;
   nbEnemies_ = NB_ENEMIES;
   timeBeforeShot_ = 0.0f;
   deltaTime_ = 0.0f;
@@ -460,6 +497,9 @@ World::setupGame() {
   variableText_.setString("0");
   variableText_.setCharacterSize(TEXT_SIZE_SCORE);
   variableText_.setPosition(16, 32);
+
+  shieldsText_.setString("Shields: " + std::to_string(nbShields_));
+  shieldsText_.setPosition(GAME_WIDTH - 11 * TEXT_SIZE_SCORE, 4);
 
 }
 
@@ -513,6 +553,7 @@ World::registerTextures() {
   loadTexture("bullet", "samples/assets/bullet.png");
   loadTexture("arrow", "samples/assets/arrow.png");
   loadTexture("title", "samples/assets/title.png");
+  loadTexture("shield", "samples/assets/shield.png");
 
 }
 
@@ -521,8 +562,8 @@ World::registerRegions() {
 
   auto& atlas = texturesPool_["atlas"];
   auto& bullet = texturesPool_["bullet"];
+  auto& shield = texturesPool_["shield"];
 
-  // Registers enemies TextureRegion
   regionsPool_["pizza"] =
     std::make_shared<ptc::engine::TextureRegion>(*atlas, 3,
                                                  sf::IntRect(0, 0, 32,32));
@@ -532,14 +573,15 @@ World::registerRegions() {
   regionsPool_["donut"] =
     std::make_shared<ptc::engine::TextureRegion>(*atlas, 2,
                                                  sf::IntRect(0, 64, 32, 32));
-  // Registers player TextureRegion
   regionsPool_["tomatoe"] =
     std::make_shared<ptc::engine::TextureRegion>(*atlas, 2,
                                                  sf::IntRect(0, 96, 32, 32));
-  // Registers bullet
   regionsPool_["bullet"] =
     std::make_shared<ptc::engine::TextureRegion>(*bullet, 1,
                                                  sf::IntRect(0, 0, 12, 12));
+  regionsPool_["shield"] =
+    std::make_shared<ptc::engine::TextureRegion>(*shield, 1,
+                                                 sf::IntRect(0, 0, 90, 44));
 
 }
 
@@ -549,8 +591,12 @@ World::registerEvents() {
   auto& player = playerActor_;
   auto& timeShot = timeBeforeShot_;
   auto& timerPlayerAnim = timerPlayerAnimation_;
+  auto& timerShield = timerShieldActivation_;
+  auto& timerNextShield = timerNextShield_;
   auto& renderer = renderer_;
   auto& pool = regionsPool_;
+  auto& nbShields = nbShields_;
+  auto& shieldText = shieldsText_;
 
   processor_ = std::make_shared<ptc::event::InputProcessor>();
   processor_->registerEvent(ptc::event::Event::RIGHT, [&player]() -> void {
@@ -561,6 +607,24 @@ World::registerEvents() {
   processor_->registerEvent(ptc::event::Event::LEFT, [&player]() -> void {
 
     player->moveLeft();
+
+  });
+  processor_->registerEvent(ptc::event::Event::DOWN,
+                            [&timerShield, &timerNextShield, &renderer,
+                              &nbShields, &shieldText]() -> void {
+
+    auto& shield = renderer.getList("shield").front();
+    if (nbShields == 0 || shield->isVisible()) return;
+
+    if (timerNextShield.getElapsedTime().asSeconds() <
+      TIME_NEXT_SHIELD_ACTIVATION) {
+      return;
+    }
+
+    shield->setVisible(true);
+
+    timerShield.restart();
+    timerNextShield.restart();
 
   });
   processor_->registerEvent(ptc::event::Event::UP, [&timeShot, &player,
