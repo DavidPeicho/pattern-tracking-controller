@@ -8,14 +8,9 @@
 
 namespace ptc {
   namespace surf {
-
     class Ransac {
-      public:
-      Ransac() {}
-
-      void init();
-      void findHomography(std::vector<cv::Point2f> &object, std::vector<cv::Point2f> &scene, cv::Mat &H);
-
+      static void findHomography(std::vector<cv::Point2f> &object, std::vector<cv::Point2f> &scene, cv::Mat &H);
+      static void gaussJordan(cv::Mat_<double> &coeffs, cv::Mat_<float> &H);
     };
 
   }
