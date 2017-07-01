@@ -6,6 +6,7 @@
 #include <math.h>
 #include <processing/processing.hpp>
 #include <surf/geometry.hpp>
+#include <surf/ransac.hpp>
 #include "opencv2/xfeatures2d.hpp"
 
 bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches);
@@ -73,7 +74,11 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
     obj.push_back(keypointsArrowUp[good_matches[i].queryIdx].pt);
     scene.push_back(keypointsTest[good_matches[i].trainIdx].pt);
   }
-  cv::Mat H = findHomography(obj, scene, CV_RANSAC);
+
+  cv::Mat_<double> H2 = findHomography(obj, scene, CV_RANSAC);
+  std::cout << "own:" << std::endl;
+  cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
+  ptc::surf::Ransac::findHomography(obj, scene, H);
 
   // Get the corners from the image_1 ( the object to be "detected" )
   std::vector<cv::Point2f> obj_corners(4);
