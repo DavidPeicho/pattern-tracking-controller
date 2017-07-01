@@ -76,9 +76,13 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   }
 
   cv::Mat_<double> H2 = findHomography(obj, scene, CV_RANSAC);
-  std::cout << "own:" << std::endl;
+  std::cout << "OpenCv H:" << std::endl;
+  ptc::surf::Ransac::printMat(H2);
+
   cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
   ptc::surf::Ransac::findHomography(obj, scene, H);
+  std::cout << "own H:" << std::endl;
+  ptc::surf::Ransac::printMat(H);
 
   // Get the corners from the image_1 ( the object to be "detected" )
   std::vector<cv::Point2f> obj_corners(4);

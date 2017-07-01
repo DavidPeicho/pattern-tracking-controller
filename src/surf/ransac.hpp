@@ -21,6 +21,9 @@ namespace ptc {
         // Compute number of pairs of points from in_points to out_points that fit to the homography matrix H
         static int computeFittingPoints(std::vector<cv::Point2f> &in_points, std::vector<cv::Point2f> &out_points,
                                         cv::Mat_<double> &H, double decisionThreshold);
+
+      public:
+        static void printMat(cv::Mat_<double> &mat);
     };
 
   }

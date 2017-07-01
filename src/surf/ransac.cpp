@@ -28,9 +28,16 @@ namespace ptc {
         // Fill coefs matrix for calculating H
         std::vector<cv::Point2f> in_points;
         std::vector<cv::Point2f> out_points;
-        for (unsigned int k = 0; k < nbPoints; k++) {
-          in_points.push_back(object[indices[k]]);
-          out_points.push_back(scene[indices[k]]);
+        int kmax = nbPoints;
+        for (int k = 0; k < kmax; k++) {
+          int l = indices[k];
+          // Ignore points if they have a small value (artifacts of previous computations)
+          if (object[l].x < 0.1 || object[l].y < 0.1 || scene[l].x < 0.1 || scene[l].y < 0.1) {
+            kmax++;
+            continue;
+          }
+          in_points.push_back(object[l]);
+          out_points.push_back(scene[l]);
         }
         // Compute HCandidate the homography matrix
         cv::Mat_<double> HCandidate = cv::Mat_<double>::zeros(3, 3);
@@ -61,61 +68,52 @@ namespace ptc {
                               cv::Mat_<double> &H)
     {
       int nbPoints = (int) in_points.size();
-      cv::Mat_<double> coefs = cv::Mat_<double>::zeros(nbPoints, 10);
+      cv::Mat_<double> A = cv::Mat_<double>::zeros(nbPoints * 2, 9);
       for (int i = 0; i < nbPoints; i++) {
-        cv::Mat_<double> U(3, 1);
-        U[0][0] = in_points[i].x;
-        U[1][0] = in_points[i].y;
-        U[2][0] = 1;
-        cv::Mat_<double> V(1, 3);
-        V[0][0] = out_points[i].x;
-        V[0][1] = out_points[i].y;
-        V[0][2] = 1;
-        cv::Mat_<double> UV = U * V;
-        for (int j = 0; j < 9; j++)
-          coefs[i][j] = UV[j / 3][j % 3];
+        A[2 * i][0] = in_points[i].x;
+        A[2 * i][1] = in_points[i].y;
+        A[2 * i][2] = 1;
+        A[2 * i][6] = -out_points[i].x * in_points[i].x;
+        A[2 * i][7] = -out_points[i].x * in_points[i].y;
+        A[2 * i][8] = -out_points[i].x;
+        A[2 * i + 1][3] = in_points[i].x;
+        A[2 * i + 1][4] = in_points[i].y;
+        A[2 * i + 1][5] = 1;
+        A[2 * i + 1][6] = -out_points[i].y * in_points[i].x;
+        A[2 * i + 1][7] = -out_points[i].y * in_points[i].y;
+        A[2 * i + 1][8] = -out_points[i].y;
       }
-      for (int i = 0; i < nbPoints; i++)
-        coefs[i][9] = 0;
-      gaussJordan(coefs, H);
+      cv::Mat_<double> At = cv::Mat_<double>(9, nbPoints * 2);
+      cv::transpose(A, At);
+      cv::Mat_<double> AA = At * A;
+      cv::Mat_<double> eigenvectors = cv::Mat_<double>(9, 9);
+      std::vector<double> eigenvalues(9);
+      cv::eigen(AA, eigenvalues, eigenvectors);
+      int l = (int) (eigenvalues.size() - 1); // The index of the eigenvect with smallest eigenval
+      for (int i = 0; i < 9; i++) {
+        eigenvectors[l][i] /= eigenvectors[l][8];
+        H[i / 3][i % 3] = eigenvectors[l][i];
+      }
+      /*
+      std::cout << "FOUND HOMOGRAPHY:" << std::endl;
+      printMat(H);
+      */
+      /*
+      cv::Mat_<double> eigenV = cv::Mat_<double>::zeros(9, 1);
+      for (int i = 0; i < 9; i++) {
+        eigenV[i][0] = eigenvectors[l][i];
+      }
+      cv::Mat_<double> zero = A * eigenV;
+      printMat(zero);
+       */
     }
 
-
-    void Ransac::gaussJordan(cv::Mat_<double> &coeffs, cv::Mat_<double> &H) {
-      int r = -1;
-      for (int j = 0; j < 8; j++) {
-        double maxLine = 0;
-        // Get pivot line
-        int k = 0;
-        for (int it = r + 1; it < coeffs.size().height; it++) {
-          if (coeffs[it][j] > maxLine) {
-            maxLine = coeffs[it][j];
-            k = it;
-          }
-        }
-        if (coeffs[k][j] != 0) {
-          r++;
-          for (int it = 0; it < 10; it++)
-            coeffs[k][it] /= coeffs[k][j];
-          for (int it = 0; it < 10; it++)
-            cv::swap(coeffs[r][it], coeffs[k][it]);
-          for (int i = 0; i < coeffs.size().height; i++) {
-            if (i != r) {
-              for (int it = 0; it < 10; it++)
-                coeffs[i][it] -= coeffs[r][it] * coeffs[i][j];
-            }
-          }
-        }
-        std::cout << "coeffs" << std::endl;
-        for (int i = 0; i < 8; i++) {
-          for (int l = 0; l < 10; l++)
-            std::cout << coeffs[i][l] << " ";
-          std::cout << std::endl;
+    void Ransac::printMat(cv::Mat_<double> &mat) {
+      for (int i = 0; i < mat.size().height; i++) {
+        for (int j = 0; j < mat.size().width; j++) {
+          std::cout << mat[i][j] << "  ";
         }
         std::cout << std::endl;
-      }
-      for (int i = 0; i < 9; i++) {
-        H[i / 3][i % 3] = coeffs[i][8];
       }
     }
 
@@ -134,8 +132,12 @@ namespace ptc {
         V[0][2] = 1;
         double normV = cv::norm(V);
         cv::Mat_<double> UH = H * U;
+        for (int i = 0; i < 3; i++)
+          UH[i][0] /= UH[2][0];
+        //double err = cv::norm(UH - V);
         double normUH = cv::norm(UH);
         double err = cv::abs(normUH - normV);
+        //std::cout << err << std::endl;
         if (err < decisionThreshold)
            nbGood += 1;
       }
