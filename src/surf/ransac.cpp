@@ -20,15 +20,18 @@ namespace ptc {
       int maxIter = (int)(cv::log(1 - probaNotAllOutliers) / cv::log(1 - probaAllPointsGood) + 1);
       std::vector<int> indices(object.size());
       std::iota(indices.begin(), indices.end(), 1);
+      cv::Mat_<double> HCandidate(3, 3);
 
+      std::vector<cv::Point2f> in_points(8);
+      std::vector<cv::Point2f> out_points(8);
+      std::vector<cv::Point2f> in_points2(24);
+      std::vector<cv::Point2f> out_points2(24);
 
       for (int i = 0; i < maxIter; ++i) {
         std::random_shuffle(indices.begin(), indices.end());
 
-        // Fill coefs matrix for calculating H
-        std::vector<cv::Point2f> in_points;
-        std::vector<cv::Point2f> out_points;
         int kmax = nbPoints;
+        int it = 0;
         for (int k = 0; k < kmax; k++) {
           int l = indices[k];
           // Ignore points if they have a small value (artifacts of previous computations)
@@ -36,21 +39,22 @@ namespace ptc {
             kmax++;
             continue;
           }
-          in_points.push_back(object[l]);
-          out_points.push_back(scene[l]);
+          in_points[it] = object[l];
+          out_points[it] = scene[l];
+          it++;
         }
         // Compute HCandidate the homography matrix
-        cv::Mat_<double> HCandidate = cv::Mat_<double>::zeros(3, 3);
         computeModel(in_points, out_points, HCandidate);
-        in_points.clear();
-        out_points.clear();
 
+        it = 0;
         for (unsigned int k = nbPoints; k < indices.size(); k++) {
-          in_points.push_back(object[indices[k]]);
-          out_points.push_back(scene[indices[k]]);
+          int l = indices[k];
+          in_points2[it] = object[l];
+          out_points2[it] = scene[l];
+          it++;
         }
         // Count transformation that achieve a reasonable error using HCandidate
-        int candidate = computeFittingPoints(in_points, out_points, HCandidate, decisionThreshold);
+        int candidate = computeFittingPoints(in_points2, out_points2, HCandidate, decisionThreshold);
 
         if (candidate > max) {
           max = candidate;
@@ -68,14 +72,16 @@ namespace ptc {
                               cv::Mat_<double> &H)
     {
       int nbPoints = (int) in_points.size();
-      cv::Mat_<double> A = cv::Mat_<double>::zeros(nbPoints * 2, 9);
+      cv::Mat_<double> A(nbPoints * 2, 9);
       for (int i = 0; i < nbPoints; i++) {
         A[2 * i][0] = in_points[i].x;
         A[2 * i][1] = in_points[i].y;
         A[2 * i][2] = 1;
+        A[2 * i][3] = A[2 * i][4] = A[2 * i][5] = 0;
         A[2 * i][6] = -out_points[i].x * in_points[i].x;
         A[2 * i][7] = -out_points[i].x * in_points[i].y;
         A[2 * i][8] = -out_points[i].x;
+        A[2 * i + 1][0] = A[2 * i + 1][1] = A[2 * i + 1][0] = 0;
         A[2 * i + 1][3] = in_points[i].x;
         A[2 * i + 1][4] = in_points[i].y;
         A[2 * i + 1][5] = 1;
@@ -130,14 +136,18 @@ namespace ptc {
         V[0][0] = out_points[k].x;
         V[0][1] = out_points[k].y;
         V[0][2] = 1;
-        double normV = cv::norm(V);
         cv::Mat_<double> UH = H * U;
+        cv::transpose(UH, UH);
         for (int i = 0; i < 3; i++)
           UH[i][0] /= UH[2][0];
-        //double err = cv::norm(UH - V);
-        double normUH = cv::norm(UH);
-        double err = cv::abs(normUH - normV);
-        //std::cout << err << std::endl;
+        std::cout << "UH" << std::endl;
+        printMat(UH);
+        std::cout << "V" << std::endl;
+        printMat(V);
+        cv::Mat_<double> diff = UH - V;
+        std::cout << "diff" << std::endl;
+        printMat(diff);
+        double err = cv::norm(diff);
         if (err < decisionThreshold)
            nbGood += 1;
       }
