@@ -14,7 +14,6 @@ TrackerImpl::TrackerImpl()
 
   arrowPoints_.reserve(3);
   arrowContour_.reserve(MAX_PTS_NB);
-
 }
 
 TrackerImpl::~TrackerImpl() {
@@ -40,8 +39,8 @@ bool
 TrackerImpl::update(const std::shared_ptr<event::InputProcessor>&
                     inputProcessor) {
 
+  requestNextFrame();
   if (debugFrame_ == nullptr) {
-    rawFrame_ = v_.nextFrame();
     preprocessFrame(rawFrame_);
     auto bin = frames_[ptc::data::Frame::BINARIZED];
     return processFrame(*bin, inputProcessor);
@@ -142,6 +141,13 @@ TrackerImpl::processFrame(const cv::Mat& input,
 
 }
 
+void
+TrackerImpl::requestNextFrame() {
+
+  rawFrame_ = v_.nextFrame();
+
+}
+
 int
 TrackerImpl::getWidth() const {
 
@@ -220,24 +226,20 @@ TrackerImpl::computeEvents(const std::shared_ptr<event::InputProcessor>&
   double angle = (acos(dir.x) * 180.0) / M_PI;
   if (dir.y < 0.0) angle = 360.0 - angle;
 
-  static auto rightBounds = std::make_tuple(-60.0, 60.0);
-  static auto upBounds = std::make_tuple(30.0, 150.0);
-  static auto leftBounds = std::make_tuple(120.0, 240.0);
-  static auto downBounds = std::make_tuple(210.0, 330.0);
-
   bool noAction = true;
-  if (utils::maths::inBounds(angle, rightBounds)) {
+  if ((angle >= 308.0f && angle <= 360.0f) ||
+      (angle >= 0.0f && angle <= 50.0f)) {
     inputProcessor->call(event::Event::LEFT);
     noAction = false;
-  } else if (utils::maths::inBounds(angle, leftBounds)) {
+  } else if (angle >= 120.0f && angle <= 230.0) {
     inputProcessor->call(event::Event::RIGHT);
     noAction = false;
   }
 
-  if (utils::maths::inBounds(angle, upBounds)) {
+  if (angle >= 30.0f && angle < 150.0f) {
     inputProcessor->call(event::Event::UP);
     noAction = false;
-  } else if (utils::maths::inBounds(angle, downBounds)) {
+  } else if (angle >= 215.0f && angle <= 330.0f) {
     inputProcessor->call(event::Event::DOWN);
     noAction = false;
   }

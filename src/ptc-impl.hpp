@@ -44,6 +44,9 @@ class TrackerImpl {
     processFrame(const cv::Mat& input, const
                  std::shared_ptr<event::InputProcessor>& inputProcessor);
 
+    void
+    requestNextFrame();
+
   public:
     const cv::Mat&
     getRawFrame() const;

@@ -479,7 +479,7 @@ approxPoly(std::vector<cv::Point>& contour,
 
   result.push_back(tmp[0]);
   for (size_t i = 1; i < tmp.size(); ++i) {
-    error = abs(tmp[i].x - tmp[i + 1].x) + abs(tmp[i].y - tmp[i + 1].y);
+    error = abs(tmp[i].x - tmp[i - 1].x) + abs(tmp[i].y - tmp[i - 1].y);
     if (error >= 10) result.push_back(tmp[i]);
   }
 

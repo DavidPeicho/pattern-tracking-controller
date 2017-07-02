@@ -27,6 +27,7 @@ Tracker::start() {
 bool
 Tracker::update() {
 
+  pimpl_->requestNextFrame();
   if (inputProcessor_ == nullptr) return false;
 
   return pimpl_->update(inputProcessor_);

@@ -3,20 +3,27 @@
 
 #include <ptc.hpp>
 #include <opencv/cv.hpp>
+#include <vector>
 
 int main() {
 
   auto tracker = ptc::Tracker::instance();
-
-  ptc::event::InputProcessor processor;
-  processor.registerEvent(ptc::event::Event::DOWN, []() -> void {
-
+  auto inputpro = std::make_shared<ptc::event::InputProcessor>();
+  inputpro->registerEvent(ptc::event::UP, []() -> void {
+    std::cout << "UP" << std::endl;
+  });
+  inputpro->registerEvent(ptc::event::DOWN, []() -> void {
     std::cout << "DOWN" << std::endl;
-
+  });
+  inputpro->registerEvent(ptc::event::LEFT, []() -> void {
+    std::cout << "LEFT" << std::endl;
+  });
+  inputpro->registerEvent(ptc::event::RIGHT, []() -> void {
+    std::cout << "RIGHT" << std::endl;
   });
 
-  tracker->inputProcessor(processor);
   tracker->start();
+  tracker->inputProcessor(inputpro);
 
   while (true) {
 
@@ -41,6 +48,7 @@ int main() {
     cv::Mat result = cv::Mat::zeros(h, w, CV_8UC3);
     tmp.copyTo(result);
     cv::Scalar color = cv::Scalar(255, 0, 0);
+
     drawContours(result, c, 0, color, 5, 8, std::vector<cv::Vec4i>(), 0,
                  cv::Point());
     cv::imshow("frame", result);
