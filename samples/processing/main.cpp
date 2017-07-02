@@ -3,27 +3,17 @@
 
 #include <ptc.hpp>
 #include <opencv/cv.hpp>
-#include <vector>
 
-int main() {
+int main(int argc, const char** argv) {
+
+  auto processor = std::make_shared<ptc::event::InputProcessor>();
 
   auto tracker = ptc::Tracker::instance();
-  auto inputpro = std::make_shared<ptc::event::InputProcessor>();
-  inputpro->registerEvent(ptc::event::UP, []() -> void {
-    std::cout << "UP" << std::endl;
-  });
-  inputpro->registerEvent(ptc::event::DOWN, []() -> void {
-    std::cout << "DOWN" << std::endl;
-  });
-  inputpro->registerEvent(ptc::event::LEFT, []() -> void {
-    std::cout << "LEFT" << std::endl;
-  });
-  inputpro->registerEvent(ptc::event::RIGHT, []() -> void {
-    std::cout << "RIGHT" << std::endl;
-  });
-
+  tracker->inputProcessor(processor);
   tracker->start();
-  tracker->inputProcessor(inputpro);
+
+  // TODO: use argv in order to choose between
+  // surf and our custom algorithm
 
   while (true) {
 
@@ -49,8 +39,8 @@ int main() {
     tmp.copyTo(result);
     cv::Scalar color = cv::Scalar(255, 0, 0);
 
-    drawContours(result, c, 0, color, 5, 8, std::vector<cv::Vec4i>(), 0,
-                 cv::Point());
+    drawContours(result, c, 0, color, 5, 8,
+                 tracker->arrowShape(), 0, cv::Point());
     cv::imshow("frame", result);
 
   }

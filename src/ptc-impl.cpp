@@ -124,9 +124,9 @@ TrackerImpl::processFrame(const cv::Mat& input,
       if (processing::detection::isArrow(contoursPoly[i], arrowPoints_)) {
 
         // Saves contour in the container exposed by the API
-        /*std::copy(contoursPoly[i].begin(),
+        std::copy(contoursPoly[i].begin(),
                   contoursPoly[i].end(),
-                  std::back_inserter(arrowContour_));*/
+                  std::back_inserter(arrowContour_));
 
         computeEvents(inputProcessor);
         return true;

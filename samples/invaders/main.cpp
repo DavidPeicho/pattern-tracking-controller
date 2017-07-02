@@ -17,6 +17,9 @@ main() {
 
   sf::RenderWindow window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT), "Invader",
                           sf::Style::Close);
+  
+  // TODO: use argv in order to choose between
+  // surf and our custom algorithm
 
   // Creates video tracker, and registers
   // the input processor used to move
