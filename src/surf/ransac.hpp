@@ -13,17 +13,16 @@ namespace ptc {
         static void findHomography(std::vector<cv::Point2f> &object, std::vector<cv::Point2f> &scene, cv::Mat &H);
 
       private:
-        // Perform Gauss-Jordan elimination of coeffs matrix to compute H
-        static void gaussJordan(cv::Mat_<double> &coeffs, cv::Mat_<double> &H);
         // Compute homography matrix H from in_points to out_points
-        static void computeModel(std::vector<cv::Point2f> &in_points, std::vector<cv::Point2f> &out_points,
+        static void computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
                                  cv::Mat_<double> &H);
         // Compute number of pairs of points from in_points to out_points that fit to the homography matrix H
-        static int computeFittingPoints(std::vector<cv::Point2f> &in_points, std::vector<cv::Point2f> &out_points,
-                                        cv::Mat_<double> &H, double decisionThreshold);
+        static int computeFittingPoints(const std::vector<cv::Point2f> &in_points,
+                                        const std::vector<cv::Point2f> &out_points,
+                                        const cv::Mat_<double> &H, double decisionThreshold);
 
       public:
-        static void printMat(cv::Mat_<double> &mat);
+        static void printMat(const cv::Mat_<double> &mat);
     };
 
   }

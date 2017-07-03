@@ -58,7 +58,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
 
   for (int i = 0; i < descriptorArrowUp.rows; i++)
     if (matches[i].distance < 3 * min_dist)
-      good_matches.push_back( matches[i]);
+      good_matches.push_back(matches[i]);
 
 
   img_matches.data = NULL;
@@ -75,14 +75,17 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
     scene.push_back(keypointsTest[good_matches[i].trainIdx].pt);
   }
 
+  /*
   cv::Mat_<double> H2 = findHomography(obj, scene, CV_RANSAC);
   std::cout << "OpenCv H:" << std::endl;
   ptc::surf::Ransac::printMat(H2);
+   */
 
   cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
   ptc::surf::Ransac::findHomography(obj, scene, H);
   std::cout << "own H:" << std::endl;
   ptc::surf::Ransac::printMat(H);
+  /*
 
   // Get the corners from the image_1 ( the object to be "detected" )
   std::vector<cv::Point2f> obj_corners(4);
@@ -128,6 +131,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
        scene_corners[0] + cv::Point2f(arrowUpFrame.cols, 0), cv::Scalar( 0, 255, 0), 4);
 
   //-- Show detected matches
+  */
   return img_matches.data != NULL;
 }
 
