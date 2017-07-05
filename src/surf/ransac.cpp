@@ -136,20 +136,27 @@ namespace ptc {
         V.at<double>(0, 0) = out_points[k].x;
         V.at<double>(0, 1) = out_points[k].y;
         V.at<double>(0, 2) = 1;
+        /*
+        std::cout << "U" << std::endl;
+        printMat(U);
+        std::cout << "H" << std::endl;
+        printMat(H);
+        */
         cv::Mat_<double> UH = H * U;
         cv::transpose(UH, UH);
-        for (int i = 0; i < 3; i++) {
-          //double a = UH.at<double>(2, 0);
-          UH.at<double>(i, 0) /= UH.at<double>(2, 0);
-        }
-        //std::cout << "UH" << std::endl;
-        //printMat(UH);
-        //std::cout << "V" << std::endl;
-        //printMat(V);
-        cv::Mat_<double> diff(UH - V);
-        //std::cout << "diff" << std::endl;
-        //printMat(diff);
+        for (int i = 0; i < 3; i++)
+          UH.at<double>(0, i) /= UH.at<double>(0, 2);
+        /*
+        std::cout << "UH" << std::endl;
+        printMat(UH);
+        std::cout << "V" << std::endl;
+        printMat(V);
+         */
+        cv::Mat_<double> diff = UH - V;
+        std::cout << "diff" << std::endl;
+        printMat(diff);
         double err = cv::norm(diff);
+        //std::cout << "err: " << err << std::endl;
         if (err < decisionThreshold)
            nbGood += 1;
       }
