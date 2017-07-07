@@ -17,7 +17,7 @@ namespace ptc {
       double decisionThreshold = 0;
       int acceptableNbPoints = (int)(object.size() * 0.95);
       int max = 0;
-      // int maxIter = (int)(cv::log(1 - probaNotAllOutliers) / cv::log(1 - probaAllPointsGood) + 1);
+      int maxIter = (int)(cv::log(1 - probaNotAllOutliers) / cv::log(1 - probaAllPointsGood) + 1);
       std::vector<int> indices(object.size());
       std::iota(indices.begin(), indices.end(), 1);
       cv::Mat_<double> HCandidate = cv::Mat_<double>::zeros(3, 3);
@@ -27,7 +27,7 @@ namespace ptc {
       std::vector<cv::Point2f> in_points2(24);
       std::vector<cv::Point2f> out_points2(24);
 
-      for (int i = 0; i < 500; ++i) {
+      for (int i = 0; i < maxIter; ++i) {
         std::random_shuffle(indices.begin(), indices.end());
 
         int kmax = nbPoints;
@@ -53,18 +53,20 @@ namespace ptc {
           out_points2[it] = scene[l];
           it++;
         }
+
         // Count transformation that achieve a reasonable error using HCandidate
         int candidate = computeFittingPoints(in_points2, out_points2, HCandidate, decisionThreshold);
 
         if (candidate > max) {
+          H = HCandidate.clone();
           max = candidate;
         }
         // We stop if enough points are calculated correctly from the given H
         if (max >= acceptableNbPoints) {
-          H = HCandidate.clone();
           break;
         }
       }
+      H /= H.at<double>(2, 2);  // Normalize H
     }
 
 
@@ -153,14 +155,14 @@ namespace ptc {
       int nbGood = 0;
       int nbPoints = (int) in_points.size();
       cv::Mat_<double> U = cv::Mat_<double>::zeros(3, 1);
-      cv::Mat_<double> V = cv::Mat_<double>::zeros(1, 3);
+      cv::Mat_<double> V = cv::Mat_<double>::zeros(3, 1);
       for (int k = 0; k < nbPoints; k++) {
         U.at<double>(0, 0) = in_points[k].x;
         U.at<double>(1, 0) = in_points[k].y;
         U.at<double>(2, 0) = 1;
         V.at<double>(0, 0) = out_points[k].x;
-        V.at<double>(0, 1) = out_points[k].y;
-        V.at<double>(0, 2) = 1;
+        V.at<double>(1, 0) = out_points[k].y;
+        V.at<double>(2, 0) = 1;
         /*
         std::cout << "U" << std::endl;
         printMat(U);
@@ -168,23 +170,19 @@ namespace ptc {
         printMat(H);
         */
         cv::Mat_<double> UH = H * U;
-        UH *= UH.at<double>(2, 0);
-        cv::transpose(UH, UH);
-        for (int i = 0; i < 3; i++)
-          UH.at<double>(0, i) /= UH.at<double>(0, 2);
+        UH /= UH.at<double>(2, 0);
         /*
         std::cout << "UH" << std::endl;
         printMat(UH);
         std::cout << "V" << std::endl;
         printMat(V);
          */
-        cv::Mat_<double> diff = UH - V;
+        double err = cv::norm(UH - V);
         /*
         std::cout << "diff" << std::endl;
         printMat(diff);
          */
-        double err = cv::norm(diff);
-        //std::cout << "err: " << err << std::endl;
+        // std::cout << "err: " << err << std::endl;
         if (err < decisionThreshold)
            nbGood += 1;
       }
