@@ -20,6 +20,8 @@ namespace ptc {
         static int computeFittingPoints(const std::vector<cv::Point2f> &in_points,
                                         const std::vector<cv::Point2f> &out_points,
                                         const cv::Mat_<double> &H, double decisionThreshold);
+        static cv::Mat_<double> getHomographyLinearSystem(const std::vector<cv::Point2f> &in_points,
+                                                          const std::vector<cv::Point2f> &out_points);
 
       public:
         static void printMat(const cv::Mat_<double> &mat);
