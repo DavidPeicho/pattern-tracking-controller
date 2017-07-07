@@ -9,12 +9,12 @@
 namespace ptc {
   namespace surf {
     void Ransac::findHomography(std::vector<cv::Point2f> &object, std::vector<cv::Point2f> &scene, cv::Mat &H) {
-      unsigned int nbPoints = 8;
+      unsigned int nbPoints = 4;
       double probaPointWrong = 0.1;
       double probaPointGood = 1 - probaPointWrong;
       double probaAllPointsGood = cv::pow(probaPointGood, nbPoints);
       double probaNotAllOutliers = 0.99;
-      double decisionThreshold = 0;
+      double decisionThreshold = 10;
       int acceptableNbPoints = (int)(object.size() * 0.95);
       int max = 0;
       int maxIter = (int)(cv::log(1 - probaNotAllOutliers) / cv::log(1 - probaAllPointsGood) + 1);
@@ -22,12 +22,12 @@ namespace ptc {
       std::iota(indices.begin(), indices.end(), 1);
       cv::Mat_<double> HCandidate = cv::Mat_<double>::zeros(3, 3);
 
-      std::vector<cv::Point2f> in_points(8);
-      std::vector<cv::Point2f> out_points(8);
-      std::vector<cv::Point2f> in_points2(24);
-      std::vector<cv::Point2f> out_points2(24);
+      std::vector<cv::Point2f> in_points(nbPoints);
+      std::vector<cv::Point2f> out_points(nbPoints);
+      std::vector<cv::Point2f> in_points2(object.size() - nbPoints);
+      std::vector<cv::Point2f> out_points2(object.size() - nbPoints);
 
-      for (int i = 0; i < maxIter; ++i) {
+      for (int i = 0; i < 500; ++i) {
         std::random_shuffle(indices.begin(), indices.end());
 
         int kmax = nbPoints;
@@ -44,7 +44,7 @@ namespace ptc {
           it++;
         }
         // Compute HCandidate the homography matrix
-        decisionThreshold = computeModel(in_points, out_points, HCandidate);
+        computeModel(in_points, out_points, HCandidate);
 
         it = 0;
         for (unsigned int k = nbPoints; k < object.size(); k++) {
@@ -74,16 +74,20 @@ namespace ptc {
                                 cv::Mat_<double> &H)
     {
       auto A = getHomographyLinearSystem(in_points, out_points);
-      auto Hest = cv::Mat_<double>(3, 3);
+      cv::Mat_<double> At;
+      cv::transpose(A, At);
+      cv::Mat_<double> AtA = At * A;
+      cv::Mat_<double> Hest = cv::Mat_<double>(3, 3);
       cv::Mat_<double> U = cv::Mat_<double>::zeros(A.rows, A.rows * A.cols);
       cv::Mat_<double> Vt = cv::Mat_<double>::zeros(A.cols, A.rows * A.cols);
       cv::Mat_<double> S = cv::Mat_<double>::zeros(A.rows * A.cols, 1);
-      cv::SVD::compute(A, S, U, Vt);  // SVD of A
+      cv::SVD::compute(AtA, S, U, Vt);  // SVD of A
       cv::Mat_<double> h = Vt.row(Vt.rows - 1); // Last singular vector of least singular value
       for (int i = 0; i < 9; i++) {
         Hest.at<double>(i / 3, i % 3) = h.at<double>(0, i);
       }
 
+      /*
       U = cv::Mat_<double>::zeros(3, 3);
       Vt = cv::Mat_<double>::zeros(3, 3);
       S = cv::Mat_<double>::zeros(3, 1);
@@ -92,6 +96,8 @@ namespace ptc {
       for (int i = 0; i < 2; i++)  // We put last element at zero
         Sdiag.at<double>(i, i) = S.at<double>(i, 0);
       H = U * Sdiag * Vt;
+      */
+      Hest.copyTo(H);
       double max_err = 0;
       double total_err = 0;
       for (unsigned int i = 0; i < in_points.size(); i++) {

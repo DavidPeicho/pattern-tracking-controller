@@ -76,10 +76,10 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   }
 
   /*
-  cv::Mat_<double> H = findHomography(obj, scene, CV_RANSAC);
+  cv::Mat_<double> H2 = findHomography(obj, scene, CV_RANSAC);
   std::cout << "OpenCv H:" << std::endl;
-  ptc::surf::Ransac::printMat(H);
-   */
+  ptc::surf::Ransac::printMat(H2);
+  */
 
   cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
   ptc::surf::Ransac::findHomography(obj, scene, H);
@@ -92,11 +92,11 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   obj_corners[1] = cvPoint(arrowUpFrame.cols, 0);
   obj_corners[2] = cvPoint(arrowUpFrame.cols, arrowUpFrame.rows);
   obj_corners[3] = cvPoint(0, arrowUpFrame.rows);
-  std::vector<cv::Point2f> scene_corners;
+  std::vector<cv::Point2f> scene_corners(4);
 
-  //cv::perspectiveTransform(obj_corners, scene_corners, H);
   std::cout << "scene corners:" << std::endl;
-  ptc::surf::Geometry::perspectiveTransform(obj_corners, scene_corners, H);
+  cv::perspectiveTransform(obj_corners, scene_corners, H);
+  // ptc::surf::Geometry::perspectiveTransform(obj_corners, scene_corners, H);
   for (auto& e : scene_corners) {
     std::cout << e.x << " " << e.y << std::endl;
   }
@@ -106,6 +106,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   std::cout << "good matches ratio: " << good_matches_ratio << std::endl;
   if (good_matches_ratio > 0.25) {
     // Get the rotation of the image
+    // double a = H2.at<double>(0, 0), b = H2.at<double>(0, 1);
     double a = H.at<double>(0, 0), b = H.at<double>(0, 1);
     float r = cv::fastAtan2(b, a);
     if (r > 315 || r <= 45)
