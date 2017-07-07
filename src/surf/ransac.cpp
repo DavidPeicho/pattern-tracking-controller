@@ -14,7 +14,7 @@ namespace ptc {
       double probaPointGood = 1 - probaPointWrong;
       double probaAllPointsGood = cv::pow(probaPointGood, nbPoints);
       double probaNotAllOutliers = 0.99;
-      float decisionThreshold = 200;
+      double decisionThreshold = 0;
       int acceptableNbPoints = (int)(object.size() * 0.95);
       int max = 0;
       // int maxIter = (int)(cv::log(1 - probaNotAllOutliers) / cv::log(1 - probaAllPointsGood) + 1);
@@ -44,7 +44,7 @@ namespace ptc {
           it++;
         }
         // Compute HCandidate the homography matrix
-        computeModel(in_points, out_points, HCandidate);
+        decisionThreshold = computeModel(in_points, out_points, HCandidate);
 
         it = 0;
         for (unsigned int k = nbPoints; k < object.size(); k++) {
@@ -68,30 +68,65 @@ namespace ptc {
     }
 
 
-    void Ransac::computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
+    double Ransac::computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
                               cv::Mat_<double> &H)
     {
       auto A = getHomographyLinearSystem(in_points, out_points);
+      auto Hest = cv::Mat_<double>(3, 3);
       /*
       cv::Mat_<double> At = cv::Mat_<double>::zeros(9, nbPoints * 2);
       cv::transpose(A, At);
       cv::Mat_<double> AA = At * A;
       */
-      cv::Mat_<double> U = cv::Mat_<double>::zeros(3, 3);
-      cv::Mat_<double> Vt = cv::Mat_<double>::zeros(3, 3);
-      cv::Mat_<double> S = cv::Mat_<double>::zeros(3, 3);
-      cv::SVD::compute(A, S, U, Vt);
+      cv::Mat_<double> U = cv::Mat_<double>::zeros(A.rows, A.rows * A.cols);
+      cv::Mat_<double> Vt = cv::Mat_<double>::zeros(A.cols, A.rows * A.cols);
+      cv::Mat_<double> S = cv::Mat_<double>::zeros(A.rows * A.cols, 1);
+      cv::SVD::compute(A, S, U, Vt);  // SVD of A
       /*std::vector<double> eigenvalues(9);
       cv::eigen(AA, eigenvalues, eigenvectors);*/
-      cv::Mat_<double> h = Vt.row(Vt.rows - 1);
+      cv::Mat_<double> h = Vt.row(Vt.rows - 1); // Last singular vector of least singular value
       for (int i = 0; i < 9; i++) {
-        h.at<double>(0, i) /= h.at<double>(0, 8);  // Questionnable
-        H.at<double>(i / 3, i % 3) = h.at<double>(0, i);
+        // h.at<double>(0, i) /= h.at<double>(0, 8);  // FIXME: Questionnable
+        Hest.at<double>(i / 3, i % 3) = h.at<double>(0, i);
       }
-      printMat(H);
+
+      U = cv::Mat_<double>::zeros(3, 3);
+      Vt = cv::Mat_<double>::zeros(3, 3);
+      S = cv::Mat_<double>::zeros(3, 1);
+      cv::SVD::compute(Hest, S, U, Vt);  // SVD of A
+      cv::Mat_<double> Sdiag = cv::Mat_<double>::zeros(3, 3);
+      for (int i = 0; i < 2; i++)  // We put last element at zero
+        Sdiag.at<double>(i, i) = S.at<double>(i, 0);
+      H = U * Sdiag * Vt;
+      // TODO: Remove later. Its just a debug check
+      double max_err = 0;
+      double total_err = 0;
+      for (unsigned int i = 0; i < in_points.size(); i++) {
+        cv::Mat_<double> X = cv::Mat_<double>(3, 1);
+        X.at<double>(0, 0) = in_points[i].x;
+        X.at<double>(1, 0) = in_points[i].y;
+        X.at<double>(2, 0) = 1;
+        cv::Mat_<double> Y = cv::Mat_<double>(3, 1);
+        Y.at<double>(0, 0) = out_points[i].x;
+        Y.at<double>(1, 0) = out_points[i].y;
+        Y.at<double>(2, 0) = 1;
+        cv::Mat_<double> HX = H * X;
+        HX /= HX.at<double>(2, 0);
+        double err = cv::norm(HX - Y);
+        if (err > max_err)
+          max_err = err;
+        total_err += err;
+      }
+      total_err -= max_err;
+      // TODO: Debug check end
+      /*
+      std::cout << "HHHHHHHHHHOKOKOKOKOK. rows = " <<  h.rows << " cols = " << h.cols << " norm = " << cv::norm(h) << std::endl;
+      printMat(h);
+      */
+      // printMat(Hest);
       /*
       std::cout << "FOUND HOMOGRAPHY:" << std::endl;
-      printMat(H);
+      printMat(Hest);
       */
       /*
       cv::Mat_<double> eigenV = cv::Mat_<double>::zeros(9, 1);
@@ -101,6 +136,7 @@ namespace ptc {
       cv::Mat_<double> zero = A * eigenV;
       printMat(zero);
        */
+      return total_err;
     }
 
     void Ransac::printMat(const cv::Mat_<double> &mat) {
@@ -143,8 +179,10 @@ namespace ptc {
         printMat(V);
          */
         cv::Mat_<double> diff = UH - V;
+        /*
         std::cout << "diff" << std::endl;
         printMat(diff);
+         */
         double err = cv::norm(diff);
         //std::cout << "err: " << err << std::endl;
         if (err < decisionThreshold)

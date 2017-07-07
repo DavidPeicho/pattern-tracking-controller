@@ -13,9 +13,9 @@ namespace ptc {
         static void findHomography(std::vector<cv::Point2f> &object, std::vector<cv::Point2f> &scene, cv::Mat &H);
 
       private:
-        // Compute homography matrix H from in_points to out_points
-        static void computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
-                                 cv::Mat_<double> &H);
+        // Compute homography matrix H from in_points to out_points and return the average error on the model
+        static double computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
+                                 cv::Mat_<double> &Hest);
         // Compute number of pairs of points from in_points to out_points that fit to the homography matrix H
         static int computeFittingPoints(const std::vector<cv::Point2f> &in_points,
                                         const std::vector<cv::Point2f> &out_points,
