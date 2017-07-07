@@ -71,24 +71,16 @@ namespace ptc {
 
 
     double Ransac::computeModel(const std::vector<cv::Point2f> &in_points, const std::vector<cv::Point2f> &out_points,
-                              cv::Mat_<double> &H)
+                                cv::Mat_<double> &H)
     {
       auto A = getHomographyLinearSystem(in_points, out_points);
       auto Hest = cv::Mat_<double>(3, 3);
-      /*
-      cv::Mat_<double> At = cv::Mat_<double>::zeros(9, nbPoints * 2);
-      cv::transpose(A, At);
-      cv::Mat_<double> AA = At * A;
-      */
       cv::Mat_<double> U = cv::Mat_<double>::zeros(A.rows, A.rows * A.cols);
       cv::Mat_<double> Vt = cv::Mat_<double>::zeros(A.cols, A.rows * A.cols);
       cv::Mat_<double> S = cv::Mat_<double>::zeros(A.rows * A.cols, 1);
       cv::SVD::compute(A, S, U, Vt);  // SVD of A
-      /*std::vector<double> eigenvalues(9);
-      cv::eigen(AA, eigenvalues, eigenvectors);*/
       cv::Mat_<double> h = Vt.row(Vt.rows - 1); // Last singular vector of least singular value
       for (int i = 0; i < 9; i++) {
-        // h.at<double>(0, i) /= h.at<double>(0, 8);  // FIXME: Questionnable
         Hest.at<double>(i / 3, i % 3) = h.at<double>(0, i);
       }
 
@@ -100,7 +92,6 @@ namespace ptc {
       for (int i = 0; i < 2; i++)  // We put last element at zero
         Sdiag.at<double>(i, i) = S.at<double>(i, 0);
       H = U * Sdiag * Vt;
-      // TODO: Remove later. Its just a debug check
       double max_err = 0;
       double total_err = 0;
       for (unsigned int i = 0; i < in_points.size(); i++) {
@@ -120,24 +111,6 @@ namespace ptc {
         total_err += err;
       }
       total_err -= max_err;
-      // TODO: Debug check end
-      /*
-      std::cout << "HHHHHHHHHHOKOKOKOKOK. rows = " <<  h.rows << " cols = " << h.cols << " norm = " << cv::norm(h) << std::endl;
-      printMat(h);
-      */
-      // printMat(Hest);
-      /*
-      std::cout << "FOUND HOMOGRAPHY:" << std::endl;
-      printMat(Hest);
-      */
-      /*
-      cv::Mat_<double> eigenV = cv::Mat_<double>::zeros(9, 1);
-      for (int i = 0; i < 9; i++) {
-        eigenV[i][0] = eigenvectors[l][i];
-      }
-      cv::Mat_<double> zero = A * eigenV;
-      printMat(zero);
-       */
       return total_err;
     }
 
@@ -163,28 +136,11 @@ namespace ptc {
         V.at<double>(0, 0) = out_points[k].x;
         V.at<double>(1, 0) = out_points[k].y;
         V.at<double>(2, 0) = 1;
-        /*
-        std::cout << "U" << std::endl;
-        printMat(U);
-        std::cout << "H" << std::endl;
-        printMat(H);
-        */
         cv::Mat_<double> UH = H * U;
         UH /= UH.at<double>(2, 0);
-        /*
-        std::cout << "UH" << std::endl;
-        printMat(UH);
-        std::cout << "V" << std::endl;
-        printMat(V);
-         */
         double err = cv::norm(UH - V);
-        /*
-        std::cout << "diff" << std::endl;
-        printMat(diff);
-         */
-        // std::cout << "err: " << err << std::endl;
         if (err < decisionThreshold)
-           nbGood += 1;
+          nbGood += 1;
       }
       return nbGood;
     }

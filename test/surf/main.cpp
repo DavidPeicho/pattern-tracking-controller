@@ -57,7 +57,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   std::vector<cv::DMatch> good_matches;
 
   for (int i = 0; i < descriptorArrowUp.rows; i++)
-    if (matches[i].distance < 3 * min_dist)
+    if (matches[i].distance < 8 * min_dist)
       good_matches.push_back(matches[i]);
 
 
@@ -76,16 +76,15 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   }
 
   /*
-  cv::Mat_<double> H2 = findHomography(obj, scene, CV_RANSAC);
+  cv::Mat_<double> H = findHomography(obj, scene, CV_RANSAC);
   std::cout << "OpenCv H:" << std::endl;
-  ptc::surf::Ransac::printMat(H2);
+  ptc::surf::Ransac::printMat(H);
    */
 
   cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
   ptc::surf::Ransac::findHomography(obj, scene, H);
   std::cout << "own H:" << std::endl;
   ptc::surf::Ransac::printMat(H);
-  /*
 
   // Get the corners from the image_1 ( the object to be "detected" )
   std::vector<cv::Point2f> obj_corners(4);
@@ -96,6 +95,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   std::vector<cv::Point2f> scene_corners;
 
   //cv::perspectiveTransform(obj_corners, scene_corners, H);
+  std::cout << "scene corners:" << std::endl;
   ptc::surf::Geometry::perspectiveTransform(obj_corners, scene_corners, H);
   for (auto& e : scene_corners) {
     std::cout << e.x << " " << e.y << std::endl;
@@ -103,7 +103,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
 
   float good_matches_ratio = (float)good_matches.size() / (float)matches.size();
 
-  std::cout << good_matches_ratio << " ";
+  std::cout << "good matches ratio: " << good_matches_ratio << std::endl;
   if (good_matches_ratio > 0.25) {
     // Get the rotation of the image
     double a = H.at<double>(0, 0), b = H.at<double>(0, 1);
@@ -131,7 +131,6 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
        scene_corners[0] + cv::Point2f(arrowUpFrame.cols, 0), cv::Scalar( 0, 255, 0), 4);
 
   //-- Show detected matches
-  */
   return img_matches.data != NULL;
 }
 
