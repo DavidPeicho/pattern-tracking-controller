@@ -14,8 +14,8 @@ int videoTest();
 int imageTest();
 
 int main() {
-  //return videoTest();
-  return imageTest();
+  return videoTest();
+  //return imageTest();
 }
 
 bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv::Mat &img_matches) {
@@ -57,7 +57,7 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   std::vector<cv::DMatch> good_matches;
 
   for (int i = 0; i < descriptorArrowUp.rows; i++)
-    if (matches[i].distance < 8 * min_dist)
+    if (matches[i].distance < 5 * min_dist)
       good_matches.push_back(matches[i]);
 
 
@@ -83,8 +83,8 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
 
   cv::Mat_<double> H = cv::Mat_<double>::zeros(3, 3);
   ptc::surf::Ransac::findHomography(obj, scene, H);
-  std::cout << "own H:" << std::endl;
-  ptc::surf::Ransac::printMat(H);
+  //std::cout << "own H:" << std::endl;
+  //ptc::surf::Ransac::printMat(H);
 
   // Get the corners from the image_1 ( the object to be "detected" )
   std::vector<cv::Point2f> obj_corners(4);
@@ -94,12 +94,14 @@ bool surfProcessImage(const cv::Mat &testFrame, const cv::Mat &arrowUpFrame, cv:
   obj_corners[3] = cvPoint(0, arrowUpFrame.rows);
   std::vector<cv::Point2f> scene_corners(4);
 
-  std::cout << "scene corners:" << std::endl;
+  //std::cout << "scene corners:" << std::endl;
   cv::perspectiveTransform(obj_corners, scene_corners, H);
   // ptc::surf::Geometry::perspectiveTransform(obj_corners, scene_corners, H);
+  /*
   for (auto& e : scene_corners) {
     std::cout << e.x << " " << e.y << std::endl;
   }
+   */
 
   float good_matches_ratio = (float)good_matches.size() / (float)matches.size();
 
