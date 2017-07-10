@@ -12,14 +12,12 @@ int main(int argc, const char** argv) {
   tracker->inputProcessor(processor);
   tracker->start();
 
-  // TODO: use argv in order to choose between
-  // surf and our custom algorithm
-
   while (true) {
 
     auto found = tracker->update();
 
-    if(cv::waitKey(20) >= 0) break;
+    auto k = cv::waitKey(30);
+    if(k == '\33') break;
 
     auto& tmp = tracker->getRawFrame();
     if (!found) {
