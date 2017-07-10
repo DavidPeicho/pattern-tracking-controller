@@ -603,21 +603,30 @@ World::registerEvents() {
   auto& pool = regionsPool_;
   auto& nbShields = nbShields_;
   auto& shieldText = shieldsText_;
+  auto& gameover = gameover_;
 
   processor_ = std::make_shared<ptc::event::InputProcessor>();
-  processor_->registerEvent(ptc::event::Event::RIGHT, [&player]() -> void {
+  processor_->registerEvent(ptc::event::Event::RIGHT,
+                            [&player, &gameover]() -> void {
+
+    if (gameover) return;
 
     player->moveRight();
 
   });
-  processor_->registerEvent(ptc::event::Event::LEFT, [&player]() -> void {
+  processor_->registerEvent(ptc::event::Event::LEFT,
+                            [&player, &gameover]() -> void {
+
+    if (gameover) return;
 
     player->moveLeft();
 
   });
   processor_->registerEvent(ptc::event::Event::DOWN,
                             [&timerShield, &timerNextShield, &renderer,
-                              &nbShields, &shieldText]() -> void {
+                              &nbShields, &shieldText, &gameover]() -> void {
+
+    if (gameover) return;
 
     auto& shield = renderer.getList("shield").front();
     if (nbShields == 0 || shield->isVisible()) return;
@@ -633,9 +642,11 @@ World::registerEvents() {
     timerNextShield.restart();
 
   });
-  processor_->registerEvent(ptc::event::Event::UP, [&timeShot, &player,
-  &renderer, &pool, &timerPlayerAnim]() ->
-    void {
+  processor_->registerEvent(ptc::event::Event::UP,
+                            [&timeShot, &player, &renderer,
+                              &pool, &timerPlayerAnim, &gameover]() -> void {
+
+    if (gameover) return;
 
     if (timeShot < World::TIME_BETWEEN_SHOT) return;
 
