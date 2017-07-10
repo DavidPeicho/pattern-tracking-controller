@@ -9,7 +9,7 @@ size_t World::GAME_HEIGHT = 640;
 size_t World::PARTICLE_SIZE = 4;
 float World::INIT_ARROW_SIDE_LEN = 4666.0f;
 float World::ENEMY_SPEED = 16.0f;
-float World::PLAYER_SPEED = 190.0f;
+float World::PLAYER_SPEED = 50.0f;
 float World::BULLET_SPEED = 220.0f;
 
 float World::TIME_BETWEEN_SHOT = 1.15f;
@@ -99,9 +99,19 @@ World::World(sf::RenderWindow& window, const sf::Font& font)
   }
 
   ptc::Tracker::instance()->update();
-
   registerEvents();
 
+  testT_ = std::make_shared<std::thread>([this] { this->scheduleRecognition(); });
+
+}
+
+void
+World::scheduleRecognition() {
+  using namespace std::chrono_literals;
+  while (true) {
+    ptc::Tracker::instance()->update();
+    std::this_thread::sleep_for(6ms);
+  }
 }
 
 void
@@ -136,8 +146,6 @@ World::updateMenu() {
   deltaTime_ = float(clock_.restart().asMilliseconds()) / 1000.0f;
 
   updateParticles();
-
-  if (!Tracker::instance()->update()) arrowSprite_.setScale(0.0f, 0.0f);
 
   // Updates title scale function of time to create
   // a dynamic menu.
@@ -226,6 +234,7 @@ World::updateGame() {
   auto& shieldRenderable = renderer_.getList("shield").front();
 
   deltaTime_ = float(clock_.restart().asMilliseconds()) / 1000.0f;
+  playerActor_->setDelta(deltaTime_);
 
   updateParticles();
 
@@ -295,7 +304,6 @@ World::updateGame() {
 
   }
 
-  playerActor_->setDelta(deltaTime_);
   // Resets player initial frame
   if (timerPlayerAnimation_.getElapsedTime().asSeconds() >= TIME_PLAYER_ANIM) {
     auto& renderable = renderer_.getList("player").front();
@@ -303,8 +311,6 @@ World::updateGame() {
   }
 
   ia_.update(deltaTime_, enemiesList, bulletsList, regionsPool_["bullet"]);
-
-  Tracker::instance()->update();
 
   int shieldWidth = texturesPool_["shield"]->getSize().x;
   shieldActor_->setPos(playerActor_->getPos().x - (shieldWidth) / 2 + 16.0f,

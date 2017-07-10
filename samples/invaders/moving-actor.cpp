@@ -1,3 +1,4 @@
+#include <iostream>
 #include "moving-actor.hpp"
 
 namespace ptc {
@@ -23,7 +24,8 @@ MovingActor::update(float delta) {
 void
 MovingActor::moveLeft() {
 
-  position_.x -= delta_ * moveSpeed_;
+  //position_.x -= delta_ * moveSpeed_;
+  position_.x -= 0.65f * moveSpeed_;
   updateBBox();
 }
 
@@ -46,7 +48,8 @@ MovingActor::moveDown() {
 void
 MovingActor::moveRight() {
 
-  position_.x += delta_ * moveSpeed_;
+  //position_.x += delta_ * moveSpeed_;
+  position_.x += 0.65f * moveSpeed_;
   updateBBox();
 
 }

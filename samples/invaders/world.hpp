@@ -4,11 +4,14 @@
 #include <memory>
 #include <unordered_map>
 #include <list>
+#include <thread>
 
 #include <SFML/Graphics.hpp>
 #include <input-processor.hpp>
 
 #include <ptc.hpp>
+
+#include <chrono>
 
 #include "../game-engine/actor.hpp"
 #include "../game-engine/texture-region.hpp"
@@ -111,6 +114,9 @@ class World {
 
   private:
     void
+    scheduleRecognition();
+
+    void
     setupMenu();
 
     void
@@ -206,6 +212,8 @@ class World {
 
     // Ui variables
     int score = 0;
+
+    std::shared_ptr<std::thread> testT_;
 
 };
 

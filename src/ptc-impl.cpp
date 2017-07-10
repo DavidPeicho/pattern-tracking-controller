@@ -4,7 +4,7 @@ namespace ptc {
 
 int           TrackerImpl::MIN_SIZE = 300;
 unsigned int  TrackerImpl::MAX_PTS_NB = 12;
-double        TrackerImpl::MIN_SCALE_FACTOR = 2.0;
+double        TrackerImpl::MIN_SCALE_FACTOR = 1.7;
 
 TrackerImpl::TrackerImpl()
             : h_{-1}, w_{-1}
